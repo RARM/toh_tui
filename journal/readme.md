@@ -1,7 +1,7 @@
 # Journal
 This folder contains records in a journal-like style of the process of creating the TOH-TUI game. The structure of this journal is:
 - Start (this file).
-- Research.
+- [Research.](research.md)
 - Design.
 - Work.
 
