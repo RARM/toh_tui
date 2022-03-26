@@ -80,11 +80,33 @@ The purpose is to move all the disks from one rod to the one in the other end. H
 
 (Rules taken from [Wikipedia](https://en.wikipedia.org/wiki/Tower_of_Hanoi).)
 
-Another interesting fact is that the puzzle can be solved in 2<sup>n</sup> - 1 moves (information given in class). For the 3 disks version requested by the professor, the optimal solution is in 7 moves.
+Another interesting fact is that the puzzle can be solved in 2<sup>n</sup> - 1 moves (information given in class); this is known as the optimal solution. For the 3 disks version requested by the professor, the optimal solution is in 7 moves.
 
 Although not required, I could add an option to demonstrate the optimal solution (moves by the computer) and change the settings to work with different amounts of disks.
 
+### Solver Algorithm
+TutorialsPoint gives an [easy-to-understand explanation](https://www.tutorialspoint.com/data_structures_algorithms/tower_of_hanoi.htm) of the recursive solution to this challenge. However, I would like an iterative approach to decrease the overhead of creating function calls for a large number of disks. I found this solution from [GeeksforGeeks](https://www.geeksforgeeks.org/iterative-tower-of-hanoi/):
+
+```txt
+1. Calculate the total number of moves required i.e. "pow(2, n)
+   - 1" here n is number of disks.
+2. If number of disks (i.e. n) is even then interchange destination 
+   pole and auxiliary pole.
+3. for i = 1 to total number of moves:
+     if i%3 == 1:
+    legal movement of top disk between source pole and 
+        destination pole
+     if i%3 == 2:
+    legal movement top disk between source pole and 
+        auxiliary pole    
+     if i%3 == 0:
+        legal movement top disk between auxiliary pole 
+        and destination pole 
+```
+
+Like in other explanations, the three pegs are named source (where the pile starts), destination, and auxiliary. In this algorithm, a legal movement between pegs could be in either direction. For example, the first scenario says that a legal move between the source and destination must be legal. This means that the move could be from source to destination or from destination to source. Keep this in mind for the design stage.
+
 ---
 
-Previous: [Start](readme.md)
-Next: Design
+Previous: [Start](readme.md)<br />
+Next: [Design](design.md)
