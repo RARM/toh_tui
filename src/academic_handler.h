@@ -9,7 +9,7 @@ void run_academic();
 class Academic_Handler
 {
 public:
-	// Setup and start game.
+	// Setup the game.
 	Academic_Handler();
 
 	// Display current game state (disks in rods).
@@ -20,7 +20,7 @@ public:
 
 private:
 	ToH_Game game;
-	size_t moves = 0;
+	size_t moves;
 };
 
 #endif

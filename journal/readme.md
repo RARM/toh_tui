@@ -3,7 +3,7 @@ This folder contains records in a journal-like style of the process of creating 
 - Start (this file).
 - [Research.](research.md)
 - [Design.](design.md)
-- Work.
+- [Work](work.md).
 
 This structure resembles, in some way, a design cycle on purpose. Start reading below.
 
