@@ -10,13 +10,13 @@ class Academic_Handler
 {
 public:
 	// Setup the game.
-	Academic_Handler();
+	// Academic_Handler();
 
 	// Display current game state (disks in rods).
-	void display();
+	// void display();
 
 	// The main function can make direct calls to the ToH_Game object.
-	friend void run_academic();
+	// friend void run_academic();
 
 private:
 	ToH_Game game;

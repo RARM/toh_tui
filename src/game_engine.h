@@ -6,7 +6,7 @@
 // Creating a simple structure to represent a disk.
 struct Disk
 {
-	int id = 0;
+	unsigned id = 0;
 	struct Disk* next = nullptr;
 };
 
@@ -21,23 +21,31 @@ public:
 	
 	~Rod_Stack();									// I. Destructor.
 	Rod_Stack(const Rod_Stack& other);				// II. Copy Constructor.
-	Rod_Stack& operator=(const Rod_Stack& other);	// III. Copy assignment.
+	Rod_Stack& operator=(const Rod_Stack& other);	// III. Copy Assignment.
 
 
 	// Return the size of the stack.
 	size_t size();
 
 	// Get the value of the top disk.
-	int top();
+	unsigned peek() { return (this->top == nullptr) ? 0 : this->top->id; }
 
 	// Push a disk to the top of the stack.
-	void push(struct Disk*);
+	void push(unsigned disk);
 
 	// Removes the top disk.
 	void pop();
 
+	// Clears the current stack.
+	void clear();
+
 private:
 	struct Disk* top;
+
+	// Helper functions.
+
+	// Deallocates all the disks in the current memory. The top pointer is not set to nullptr.
+	void del();
 };
 
 // Structure representing the state of the game.
@@ -52,22 +60,22 @@ class ToH_Game
 {
 public:
 	// Creates a game with three disks by default.
-	ToH_Game(size_t disks_amount = 3);
+	// ToH_Game(size_t disks_amount = 3);
 	
 	// Rule of three.
 
-	~ToH_Game();
-	ToH_Game(const ToH_Game& other);
-	ToH_Game& operator=(const ToH_Game& other);
+	// ~ToH_Game();
+	// ToH_Game(const ToH_Game& other);
+	// ToH_Game& operator=(const ToH_Game& other);
 
 	// Make a move. Return true if move was successful/legal; false otherwise (no move was made).
-	bool move(size_t source_rod, size_t dest_rod);
+	// bool move(size_t source_rod, size_t dest_rod);
 
 	// Returns an object representing the current state of the game.
-	Rods get_state();
+	// Rods get_state();
 
 	// Check if win (when the disks are all in rod C).
-	bool is_solved();
+	// bool is_solved();
 
 	// Constants representing each rod.
 	
