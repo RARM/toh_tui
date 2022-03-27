@@ -7,7 +7,7 @@ The architecture of the software will consist of four main modules.
 - "Academic" handler: This controls the game outputting in the same format exemplified in the start document.
 - "Full" handler: This uses the ncurses library, and it runs the program more interactively.
 
-I will start by creating all the files in the `src` folder, completing the header files, and writing a code reference. This step may overlap the work stage a little bit.
+I will start by creating all the files in the `src` folder and completing the header files. This step may overlap the work stage a little bit.
 
 ---
 
