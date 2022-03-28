@@ -86,17 +86,6 @@ size_t Rod_Stack::size() {
 }
 
 /*
-* Rod_Stack: Clear the current stacks.
-* Precondition: None.
-* Postcondition: All the disks in the current stack are deallocated and the top is set to nullptr.
-*/
-void Rod_Stack::clear() {
-    this->del();
-    this->top = nullptr;
-    return;
-}
-
-/*
 * Rod_Stack: Add a new disk to the top.
 * Precondition: A integer representing the new disk is given as the argument.
 * Postcondition: Memory is allocated for the new disk and added to the top of the rod. If the value is 0, it does nothing.
@@ -128,6 +117,34 @@ void Rod_Stack::pop() {
     }
 
     return;
+}
+
+/*
+* Rod_Stack: Clear the current stacks.
+* Precondition: None.
+* Postcondition: All the disks in the current stack are deallocated and the top is set to nullptr.
+*/
+void Rod_Stack::clear() {
+    this->del();
+    this->top = nullptr;
+    return;
+}
+
+/*
+* Get the curret state of the rod.
+* Precondition: None.
+* Postcondition: A vector with all the values from top to bottom is returned.
+*/
+std::vector<unsigned> Rod_Stack::get_state() {
+    std::vector<unsigned> state;
+    struct Disk* current{ this->top };
+
+    while (current != nullptr) {
+        state.push_back(current->id);
+        current = current->next;
+    }
+
+    return state;
 }
 
 /*

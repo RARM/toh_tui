@@ -38,6 +38,9 @@ public:
 	// Clears the current stack.
 	void clear();
 
+	// Get state of the current Rod as a vector.
+	std::vector<unsigned> get_state();
+
 private:
 	struct Disk* top;
 
