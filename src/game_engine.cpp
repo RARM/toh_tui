@@ -32,12 +32,11 @@ Rod_Stack::Rod_Stack(const Rod_Stack& other)
         this->top = current;
 
         o_current = o_current->next;
-
-        while (o_current->next != nullptr) {
-            o_current = o_current->next;
+        while (o_current != nullptr) {
             current->next = new struct Disk;
             current = current->next;
             current->id = o_current->id;
+            o_current = o_current->next;
         }
     }
 }
@@ -58,12 +57,11 @@ Rod_Stack& Rod_Stack::operator=(const Rod_Stack& other) {
         this->top = current;
 
         o_current = o_current->next;
-
-        while (o_current->next != nullptr) {
-            o_current = o_current->next;
+        while (o_current != nullptr) {
             current->next = new struct Disk;
             current = current->next;
             current->id = o_current->id;
+            o_current = o_current->next;
         }
     }
 

@@ -23,7 +23,6 @@ public:
 	Rod_Stack(const Rod_Stack& other);				// II. Copy Constructor.
 	Rod_Stack& operator=(const Rod_Stack& other);	// III. Copy Assignment.
 
-
 	// Return the size of the stack.
 	size_t size();
 
