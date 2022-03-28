@@ -163,3 +163,24 @@ void Rod_Stack::del() {
 
     return;
 }
+
+/*
+* ToH_Game Constructor.
+* Precondition: The number of disks must be given as an argument.
+* Postcondition: The game will be started from zero. All the disks will be placed in rod A.
+* 
+* How does an unsigned number represent a disk?
+* Each disk is represented by an id = 1, 2, 3, 4, etc...
+* The size of the disk when being displayed is an odd number of "x"s.
+* The width of the disk is calculated as follows: id + (id - 1) or 2 * id - 1
+*/
+ToH_Game::ToH_Game(size_t disks_num)
+    : disks_amount{ disks_num }, rods{} {
+    for (size_t i = 1; i <= this->disks_amount; i++)
+        this->rods[ToH_Game::rod_A].push(static_cast<unsigned>(i));
+}
+
+/*
+* ToH_Game: Make a move.
+* Precondition: 
+*/
