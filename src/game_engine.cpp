@@ -166,7 +166,7 @@ void Rod_Stack::del() {
 
 /*
 * ToH_Game Constructor.
-* Precondition: The number of disks must be given as an argument.
+* Precondition: The number of disks must be given as an argument. Minimum is 1 (forced).
 * Postcondition: The game will be started from zero. All the disks will be placed in rod A.
 * 
 * How does an unsigned number represent a disk?
@@ -175,12 +175,53 @@ void Rod_Stack::del() {
 * The width of the disk is calculated as follows: id + (id - 1) or 2 * id - 1
 */
 ToH_Game::ToH_Game(size_t disks_num)
-    : disks_amount{ disks_num }, rods{} {
+    : disks_amount{ (disks_num > 0) ? disks_num : 1 }, rods{} {
     for (size_t i = 1; i <= this->disks_amount; i++)
         this->rods[ToH_Game::rod_A].push(static_cast<unsigned>(i));
 }
 
 /*
 * ToH_Game: Make a move.
-* Precondition: 
+* Precondition: Constants (ToH_Game::rod_A, ToH_Game::rod_B, ToH_Game::rod_C) are given as arguments to represent the source and destination rods.
+* Postcondition: Returns true if the move is valid and done; it returns false otherwise (and no changes are made to the game).
 */
+std::tuple<bool, int> ToH_Game::move(int src, int dst) {
+    const bool valid_src{ src == ToH_Game::rod_A || src == ToH_Game::rod_B || src == ToH_Game::rod_C };
+    const bool valid_dst{ (dst == ToH_Game::rod_A || dst == ToH_Game::rod_B || dst == ToH_Game::rod_C) && src != dst };
+    int return_code{};
+
+    // const bool valid_mov{ valid_src && valid_dst && this->rods[src].size() > 0 && (this->rods[dst].peek() == 0 || this->rods[src].peek() < this->rods[dst].peek()) };
+    // Check issues first.
+    if (!valid_src || !valid_dst) // src and dst within range
+        return_code = ToH_Game::MC4;
+    else if (this->rods[src].size() == 0) // no disk in src
+        return_code = ToH_Game::MC3;
+    else if (this->rods[dst].peek() != 0 && this->rods[src].peek() > this->rods[dst].peek()) // src is bigger than dst
+        return_code = ToH_Game::MC2;
+    else // everything should be good
+        return_code = ToH_Game::MC1;
+
+    if (return_code == ToH_Game::MC1) { // move if no errors
+        struct Disk temp;
+        temp.id = this->rods[src].peek();
+        this->rods[src].pop();
+        this->rods[dst].push(temp.id);
+    }
+
+    return std::make_tuple((return_code == ToH_Game::MC1) ? true : false, return_code);
+}
+
+/*
+* ToH_Game: Get the state of the game.
+* Precondition: None.
+* Postcondition: Return a Rods structure representing the current state of the game.
+*/
+Rods ToH_Game::get_state() {
+    Rods state;
+
+    state.A = this->rods[ToH_Game::rod_A].get_state();
+    state.B = this->rods[ToH_Game::rod_B].get_state();
+    state.C = this->rods[ToH_Game::rod_C].get_state();
+
+    return state;
+}

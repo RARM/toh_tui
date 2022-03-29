@@ -2,6 +2,7 @@
 #define _TOH_Engine_H_
 
 #include <vector>
+#include <tuple>
 
 // Creating a simple structure to represent a disk.
 struct Disk
@@ -53,7 +54,7 @@ private:
 // Structure representing the state of the game.
 typedef struct Game_State_Structure
 {
-	std::vector<int> A, B, C;
+	std::vector<unsigned> A, B, C;
 } Rods;
 
 // Game Engine.
@@ -70,14 +71,24 @@ public:
 	// ToH_Game(const ToH_Game& other);
 	// ToH_Game& operator=(const ToH_Game& other);
 
-	// Make a move. Return true if move was successful/legal; false otherwise (no move was made).
-	bool move(size_t source_rod, size_t dest_rod);
+	// Make a move. Return two values, a boolean representing if the move was made and an integer representing an error code if the move was illegal.
+	std::tuple<bool, int> move(int src_rod, int dst_rod);
+		// The return could be unpacked using std::tie(val1, val2) in C++11.
+		// However, it could be done more elegantly if C++17 is used. For example: auto [val1, val2]
+		// Read more about structured binding here: https://en.cppreference.com/w/cpp/language/structured_binding
+
+	// Codes returned by the move instruction. MC = Move Code
+	static constexpr int MC0{ 0 }; // Unknown error.
+	static constexpr int MC1{ 1 }; // No errors.
+	static constexpr int MC2{ 2 }; // Source disk is bigger than destination.
+	static constexpr int MC3{ 3 }; // There is no disk in source.
+	static constexpr int MC4{ 4 }; // A rod is out of range (it has to be A, B, or C).
 
 	// Returns an object representing the current state of the game.
 	Rods get_state();
 
 	// Check if win (when the disks are all in rod C).
-	bool is_solved();
+	bool is_solved() { return (this->rods[ToH_Game::rod_C].size() == this->disks_amount); }
 
 	// Constants representing each rod.
 	
