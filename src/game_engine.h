@@ -96,9 +96,13 @@ public:
 	static constexpr int rod_B{ 1 };
 	static constexpr int rod_C{ 2 };
 
+	// Get the total amount of moves so far.
+	size_t get_moves() { return this->moves; }
+
 private:
 	Rod_Stack rods[3];
 	const size_t disks_amount;
+	size_t moves;
 };
 
 #endif

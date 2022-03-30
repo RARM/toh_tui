@@ -175,7 +175,7 @@ void Rod_Stack::del() {
 * The width of the disk is calculated as follows: id + (id - 1) or 2 * id - 1
 */
 ToH_Game::ToH_Game(size_t disks_num)
-    : disks_amount{ (disks_num > 0) ? disks_num : 1 }, rods{} {
+    : disks_amount{ (disks_num > 0) ? disks_num : 1 }, rods{}, moves{ 0 } {
     for (size_t i{ this->disks_amount }; i > 0; i--)
         this->rods[ToH_Game::rod_A].push(static_cast<unsigned>(i));
 }
@@ -206,6 +206,7 @@ std::tuple<bool, int> ToH_Game::move(int src, int dst) {
         temp.id = this->rods[src].peek();
         this->rods[src].pop();
         this->rods[dst].push(temp.id);
+        this->moves++;
     }
 
     return std::make_tuple((return_code == ToH_Game::MC1) ? true : false, return_code);

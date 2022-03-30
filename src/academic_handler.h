@@ -12,11 +12,19 @@ public:
 	// Setup the game.
 	Academic_Handler();
 
-	// Display current game state (disks in rods) and prompt for next roung (or game over).
-	// void display();
+	// Display current game state (disks in rods).
+	void display();
 
 	// Make move using ToH_Game constants.
-	// int try_move(int src, int dst);
+	int try_move(int src, int dst);
+
+	// AHMC = Academic Handler Move Codes
+	static constexpr int AHMC0{ 0 }; // Unknown error.
+	static constexpr int AHMC1{ 1 }; // No errors. Move perfomed.
+	static constexpr int AHMC2{ 2 }; // Source disk is bigger than destination.
+
+	// Check if the puzzle was solved.
+	bool solved() { return this->game.is_solved(); }
 
 private:
 	// screen calculations
@@ -28,16 +36,15 @@ private:
 
 	// members
 	ToH_Game game;
-	size_t moves;
 	char screen[screen_height][screen_width];
 
 	// Helper functions.
 
 	// Update the screen content for display using current state.
-	// void update_screen();
+	void update_screen();
 
 	// Remove any characters from the rods that represent the disks.
-	// void clear_screen();
+	void clear_screen();
 };
 
 #endif
