@@ -176,7 +176,7 @@ void Rod_Stack::del() {
 */
 ToH_Game::ToH_Game(size_t disks_num)
     : disks_amount{ (disks_num > 0) ? disks_num : 1 }, rods{} {
-    for (size_t i = 1; i <= this->disks_amount; i++)
+    for (size_t i{ this->disks_amount }; i > 0; i--)
         this->rods[ToH_Game::rod_A].push(static_cast<unsigned>(i));
 }
 
