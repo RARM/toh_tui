@@ -2,18 +2,27 @@
 #define _ACADEMIC_HANDLER_H_
 
 #include "game_engine.h"
+#include <string>
+#include <iostream>
 
 // Run game in "Academic" mode.
 void run_academic();
 
+typedef struct Point_Struct {
+	size_t x{ 0 }, y{ 0 };
+} Point;
+
+/*
+* Academic Handler only works with 3 disks (id = 1, 2, and 3).
+*/
 class Academic_Handler
 {
 public:
 	// Setup the game.
 	Academic_Handler();
 
-	// Display current game state (disks in rods).
-	void display();
+	// Draw current game state to the output stream.
+	friend std::ostream& operator<<(std::ostream& os, const Academic_Handler& handler);
 
 	// Make move using ToH_Game constants.
 	int try_move(int src, int dst);
@@ -41,10 +50,13 @@ private:
 	// Helper functions.
 
 	// Update the screen content for display using current state.
-	void update_screen();
+	void update_screen_mem();
 
 	// Remove any characters from the rods that represent the disks.
 	void clear_screen();
+
+	// Draw rod in the screen memory given the origin.
+	void draw_rod(Point origin, std::vector<unsigned> rod);
 };
 
 #endif
