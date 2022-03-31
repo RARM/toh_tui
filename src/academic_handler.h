@@ -22,7 +22,7 @@ public:
 	Academic_Handler();
 
 	// Draw current game state to the output stream.
-	friend std::ostream& operator<<(std::ostream& os, const Academic_Handler& handler);
+	friend std::ostream& operator<<(std::ostream& os, Academic_Handler& handler);
 
 	// Make move using ToH_Game constants.
 	int try_move(int src, int dst);

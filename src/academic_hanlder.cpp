@@ -8,7 +8,42 @@
 #include "academic_handler.h"
 
 void run_academic() {
-    std::cout << "Hello world!" << std::endl;
+    Academic_Handler handler;
+    
+    std::cout << "Hello world!\n"
+              << "Printing the current state of the new game.\n\n";
+    
+    std::cout << handler << std::endl;
+
+    std::cout << "Now, it will just show moves.\n";
+
+    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_C);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
+
+    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_B);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
+
+    handler.try_move(ToH_Game::rod_C, ToH_Game::rod_B);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
+
+    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_C);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
+
+    handler.try_move(ToH_Game::rod_B, ToH_Game::rod_A);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
+
+    handler.try_move(ToH_Game::rod_B, ToH_Game::rod_C);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
+
+    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_C);
+    std::cout << handler << std::endl;
+    std::cout << "----------------------------------------------------\n";
 
     return;
 }
@@ -28,7 +63,10 @@ Academic_Handler::Academic_Handler()
 * Precondition: None.
 * Postcondition: The content of screen is sent to the outstream.
 */
-std::ostream& operator<<(std::ostream& os, const Academic_Handler& handler) {
+std::ostream& operator<<(std::ostream& os, Academic_Handler& handler) {
+    handler.clear_screen();
+    handler.update_screen_mem();
+
     for (size_t y{ 0 }; y < Academic_Handler::screen_height; y++) {
         for (size_t x{ 0 }; x < Academic_Handler::screen_width; x++)
             os << handler.screen[y][x];
@@ -98,9 +136,13 @@ void Academic_Handler::clear_screen() {
         for (size_t j{ 0 }; j < Academic_Handler::screen_width; j++) screen[i][j] = ' ';
 
     // Letter A, B, and C are in the base of each rod.
-    screen[Academic_Handler::screen_height - 1][Academic_Handler::id_spacing + (Academic_Handler::tower_width / 2) + 1] = 'A';
-    screen[Academic_Handler::screen_height - 1][Academic_Handler::ft_spacing + Academic_Handler::id_spacing * 2 + Academic_Handler::tower_width + (Academic_Handler::tower_width / 2) + 1] = 'B';
-    screen[Academic_Handler::screen_height - 1][Academic_Handler::ft_spacing * 2 + Academic_Handler::id_spacing * 3 + Academic_Handler::tower_width * 2 + (Academic_Handler::tower_width / 2) + 1] = 'C';
+    constexpr size_t y_pos{ Academic_Handler::screen_height - 1 };
+    constexpr size_t letter_pos{ Academic_Handler::id_spacing + (Academic_Handler::tower_width / 2) };
+    constexpr size_t total_tower_width{ Academic_Handler::ft_spacing + Academic_Handler::id_spacing + Academic_Handler::tower_width };
+
+    screen[y_pos][letter_pos] = 'A';
+    screen[y_pos][total_tower_width + letter_pos] = 'B';
+    screen[y_pos][total_tower_width * 2 + letter_pos] = 'C';
 }
 
 /*
@@ -114,7 +156,7 @@ void Academic_Handler::clear_screen() {
 * exists for this game.
 */
 void Academic_Handler::draw_rod(Point origin, std::vector<unsigned> rod) {
-    size_t y_pos{ origin.y }, x_pos{ origin.y };
+    size_t y_pos{ origin.y }, x_pos{ origin.x };
     const size_t num_disks = rod.size();
     
     if (num_disks > 0) // update only if there is something to update
