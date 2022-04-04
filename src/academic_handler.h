@@ -35,6 +35,12 @@ public:
 	// Check if the puzzle was solved.
 	bool solved() { return this->game.is_solved(); }
 
+	// Returns the move count in the game.
+	size_t get_moves() { return game.get_moves(); }
+
+	// Returns the amount of moves for the optimal solution for this game.
+	size_t best_sol() { return game.opt_sol(); }
+
 private:
 	// screen calculations
 	static constexpr size_t screen_height{ 4 }; // how tall the screen is going to be

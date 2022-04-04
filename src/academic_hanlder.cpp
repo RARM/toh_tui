@@ -7,44 +7,103 @@
 */
 #include "academic_handler.h"
 
+/*
+* Helper function. Given a character, returns the symbol representing
+* a rod for the game. It returns -1 if the letter is not valid.
+*/
+int c_to_s(char letter) {
+    int rod;
+
+    switch (letter)
+    {
+    case 'A':
+    case 'a':
+        rod = ToH_Game::rod_A;
+        break;
+    case 'B':
+    case 'b':
+        rod = ToH_Game::rod_B;
+        break;
+    case 'C':
+    case 'c':
+        rod = ToH_Game::rod_C;
+        break;
+    default:
+        rod = -1;
+    }
+
+    return rod;
+}
+
+/*
+* Helper function. Read the standard input for a character that
+* actually represents a rods for the game.
+*/
+int get_rod() {
+    char user_input;
+
+    do {
+        std::cin >> user_input;
+    } while (user_input == ' ' || user_input == '\t'); // in case it extracts a whitespace (it shouldn't?)
+
+    return c_to_s(user_input);
+}
+
+/*
+* Helper function. Returns two integers representing the source and
+* destination rods based on the letters input.
+*/
+std::tuple<int, int> get_user_input() {
+    int out_src, out_dst;
+    bool valid_symbols;
+
+    do {
+        out_src = get_rod();
+        out_dst = get_rod();
+        valid_symbols = out_src != -1 && out_dst != -1;
+
+        if (!valid_symbols) std::cout << "Invalid rods. Please, try again: ";
+    
+        // std::cin.clear();   // Clears any errors.
+        std::cin.ignore();  // Discards the buffer.
+    } while (!valid_symbols);
+
+    return std::make_tuple(out_src, out_dst);
+}
+
+/*
+* Main routine for the Academic version.
+* This manages the interfaces with the user.
+*/
 void run_academic() {
     Academic_Handler handler;
+    int src, dst, move_code;
     
-    std::cout << "Hello world!\n"
-              << "Printing the current state of the new game.\n\n";
+    std::cout << "Welcome to the Tower of Hanoi game.\n"
+              << "There are three disks. All of them are in the rod A.\n"
+              << "You win when you move all the disks to the rod C.\n\n";
+
+    while (!handler.solved()) {
+        std::cout << handler << "\n"; // Print the state of the game.
+
+        std::cout << "Give the source stack (A, B, or C) and destination stack separated by 1 space.\n"
+                  << "What is your move? " << std::flush;
+
+        std::tie(src, dst) = get_user_input();
+        move_code = handler.try_move(src, dst);
+
+        if (move_code == Academic_Handler::AHMC2) std::cout << "\nCan't cheat!\n";
+
+        std::cout << std::endl;
+    }
+
+    std::cout << handler << "\n";
+
+    if (handler.best_sol() == handler.get_moves()) std::cout << "Can't do better than that!";
+    else std::cout << "Won in " << handler.get_moves() << " moves!";
+
+    std::cout << std::endl;
     
-    std::cout << handler << std::endl;
-
-    std::cout << "Now, it will just show moves.\n";
-
-    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_C);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
-    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_B);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
-    handler.try_move(ToH_Game::rod_C, ToH_Game::rod_B);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
-    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_C);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
-    handler.try_move(ToH_Game::rod_B, ToH_Game::rod_A);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
-    handler.try_move(ToH_Game::rod_B, ToH_Game::rod_C);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
-    handler.try_move(ToH_Game::rod_A, ToH_Game::rod_C);
-    std::cout << handler << std::endl;
-    std::cout << "----------------------------------------------------\n";
-
     return;
 }
 

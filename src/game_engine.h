@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <tuple>
+#include <cmath>
 
 // Creating a simple structure to represent a disk.
 struct Disk
@@ -98,6 +99,9 @@ public:
 
 	// Get the total amount of moves so far.
 	size_t get_moves() { return this->moves; }
+
+	// Return the amount of moves for the optimal solution for this game.
+	size_t opt_sol() { return static_cast<size_t>(std::pow(2, this->disks_amount)) - 1; }
 
 private:
 	Rod_Stack rods[3];
