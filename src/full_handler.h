@@ -11,16 +11,16 @@ class Full_Handler
 {
 public:
 	// Setup the game.
-	Full_Handler();
+	// Full_Handler();
 
 	// Display setup questions. How many disks would you like to play with?
-	static size_t get_setup();
+	// static size_t get_setup();
 
 	// Manages a round.
-	void run_round();
+	// void run_round();
 
 	// Friend should be able to make direct calls to ToH_Game object.
-	friend void run_full();
+	// friend void run_full();
 
 private:
 	ToH_Game game;
@@ -37,16 +37,16 @@ private:
 	// Helper functions.
 
 	// Dispaly current state of the rods.
-	void display_rods_state();
+	// void display_rods_state();
 
 	// Display help info.
-	void display_help();
+	// void display_help();
 
 	// Display current selection for the move.
-	void display_selection();
+	// void display_selection();
 
 	// This will update selection characters and call display_selection.
-	void get_move();
+	// void get_move();
 };
 
 #endif
