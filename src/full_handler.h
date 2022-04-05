@@ -4,10 +4,20 @@
 
 #include "game_engine.h"
 #include <iostream>
+#include <string>
+#include <vector>
 #include <ncurses.h>
 
 // Run game in "Full" mode.
 void run_full();
+
+// Used to keep all the dimensions of a window in a single structure.
+typedef struct {
+	size_t startx = 0,
+	       starty = 0,
+		   width  = 0,
+		   height = 0;
+} Window_Dimensions_Struct;
 
 class Full_Handler
 {
