@@ -65,6 +65,7 @@ WINDOW* create_and_draw_menu(const Window_Dimensions_Struct& dimensions, const s
     mvwprintw(win, selection + 1, 2, "->");
 
     // display the window
+    refresh();
     wrefresh(win);
 
     return win;
@@ -82,14 +83,14 @@ int main_menu() {
     WINDOW* menu_win;
     std::vector<std::string> options{ generate_options_vector() };
     Window_Dimensions_Struct dimensions{ calculate_menu_dims(options) };
-    int user_input;
+    int user_input, menu_selection;
     size_t sel{ 1 }, sel_min{ 1 }, sel_max{ options.size() };
 
     // first menu draw
     menu_win = create_and_draw_menu(dimensions, options, sel);
 
     // Menu Driver
-    while ((user_input = getch()) != KEY_ENTER && user_input != KEY_BACKSPACE)
+    while ((user_input = getch()) != '\n')
     {
         switch (user_input)
         {
@@ -107,7 +108,41 @@ int main_menu() {
         }
     }
 
-    return 0;
+    delwin(menu_win);
+
+    // convert selection to Full_Handler::MM_ constant
+    switch (sel)
+    {
+    case 1:
+        menu_selection = Full_Handler::MM_Play;
+        break;
+
+    case 2:
+        menu_selection = Full_Handler::MM_Licenses;
+        break;
+    
+    default:
+        menu_selection = Full_Handler::MM_Exit;
+    }
+
+    return menu_selection;
+}
+
+/*
+* Display the licenses.
+* Precondition: None.
+* Postcondition: Display the licenses and exists when the user clicks <enter>.
+*/
+void display_licenses() {
+    int user_input;
+    
+    mvprintw(0, 0, "Licenses...\nClick <enter> to exit.");
+    refresh();
+
+    while((user_input = getch()) != '\n');
+
+    clear();
+    refresh();
 }
 
 /*
@@ -116,13 +151,34 @@ int main_menu() {
 * It starts by whosing a menu calling other functions based on the input.
 */
 void run_full() {
+    int menu_sel;
+    // Full_Handler* handler;
+    
     initscr();      // start ncurses
     cbreak();       // disable input buffering
     keypad(stdscr, TRUE);   // enable use of function and arrow keys
     noecho();       // no need to see input
+    curs_set(0);
     refresh();      // draw that black screen
-    
-    main_menu();    // start the main menu
+
+    while((menu_sel = main_menu()) != Full_Handler::MM_Exit) { // start the main menu
+        clear(); // clear the screen before entering and after exiting a routine
+        
+        switch (menu_sel)
+        {
+        case Full_Handler::MM_Play:
+            // handler = new Full_Handler();
+            // handler->play();
+            // delete handler;
+            break;
+        
+        case Full_Handler::MM_Licenses:
+            display_licenses();
+            break;
+        }
+        
+        clear();
+    }
     
     endwin();       // terminate ncurses
 }

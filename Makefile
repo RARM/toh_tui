@@ -8,17 +8,17 @@ win_headers = -I "C:\Program Files\mingw-w64\x86_64-8.1.0-release-posix-seh-rt_v
 win_libs = -L "C:\Program Files\mingw-w64\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64\opt\lib" -lncurses
 
 # ToH_TUI game compilation for Windows.
-win_toh_tui: full_handler.o academic_handler.o game_engine.o
+win_toh_tui: dist/obj/full_handler.o dist/obj/academic_handler.o dist/obj/game_engine.o src/main.cpp
 	g++ -o dist/bin/win_toh_tui src/main.cpp dist/obj/academic_handler.o dist/obj/full_handler.o dist/obj/game_engine.o -std=c++14 $(win_headers) $(win_libs) -static -Wall
 
 # Full handler compilation for Windows only.
-full_handler.o: src/full_handler.cpp src/full_handler.h
+dist/obj/full_handler.o: src/full_handler.cpp src/full_handler.h
 	g++ -o dist/obj/full_handler.o -c src/full_handler.cpp $(win_headers) -std=c++14 -Wall
 
 # Academic handler compilation.
-academic_handler.o: src/academic_handler.cpp src/academic_handler.h
+dist/obj/academic_handler.o: src/academic_handler.cpp src/academic_handler.h
 	g++ -o dist/obj/academic_handler.o -c src/academic_handler.cpp -std=c++14 -Wall
 
 # Game engine compilation.
-game_engine.o: src/game_engine.cpp src/game_engine.h
+dist/obj/game_engine.o: src/game_engine.cpp src/game_engine.h
 	g++ -o dist/obj/game_engine.o -c src/game_engine.cpp -std=c++14 -Wall
