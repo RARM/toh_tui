@@ -6,6 +6,7 @@
 * given by the professor in the start document of the journey folder.
 */
 #include "academic_handler.h"
+#include <cstdio> // To wait for character at the end.
 
 /*
 * Helper function. Given a character, returns the symbol representing
@@ -103,6 +104,11 @@ void run_academic() {
     else std::cout << "Won in " << handler.get_moves() << " moves!";
 
     std::cout << std::endl;
+
+    std::cout << "\n\nClick <enter> to exit.\n";
+    
+    // std::cin.ignore(); Not needed for just one <enter>.
+    std::getchar();
     
     return;
 }
