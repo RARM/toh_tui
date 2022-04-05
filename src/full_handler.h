@@ -3,6 +3,8 @@
 #define _FULL_HANDLER_H_
 
 #include "game_engine.h"
+#include <iostream>
+#include <ncurses.h>
 
 // Run game in "Full" mode.
 void run_full();
@@ -11,7 +13,7 @@ class Full_Handler
 {
 public:
 	// Setup the game.
-	// Full_Handler();
+	Full_Handler();
 
 	// Display setup questions. How many disks would you like to play with?
 	// static size_t get_setup();
@@ -21,6 +23,12 @@ public:
 
 	// Friend should be able to make direct calls to ToH_Game object.
 	// friend void run_full();
+
+	// Main Menu options.
+	static constexpr int MM_Exit{ 0 };
+	static constexpr int MM_Play{ 1 };
+	static constexpr int MM_Licenses{ 2 };
+	// static constexpr int MM_About{ 3 }; // Maybe implement this later.
 
 private:
 	ToH_Game game;
