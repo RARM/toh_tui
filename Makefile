@@ -1,5 +1,7 @@
 # Make file for ToH_TUI
 
+# Run: mingw32-make win_toh_tui
+
 # Edit the variables below.
 # Path to header file.
 win_headers = -I "C:\Program Files\mingw-w64\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64\opt\include\ncursesw" -I "C:\Program Files\mingw-w64\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64\opt\include"
