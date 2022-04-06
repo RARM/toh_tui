@@ -182,3 +182,14 @@ void run_full() {
     
     endwin();       // terminate ncurses
 }
+
+/*
+* Full Handler Constructor
+* Precondition: ncurses must be initialized.
+* Postcondition: A new game is setup. After this, call play to run the game.
+*/
+/* Full_Handler::Full_Handler()
+    : src_sel{ NULL }, dst_sel{ NULL } {
+    size_t disks{ Full_Handler::setup_disks() };
+    this->game = new ToH_Game(disks);
+} */

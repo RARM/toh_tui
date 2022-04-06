@@ -23,16 +23,13 @@ class Full_Handler
 {
 public:
 	// Setup the game.
-	Full_Handler();
-
-	// Display setup questions. How many disks would you like to play with?
-	// static size_t get_setup();
+	// Full_Handler();
 
 	// Manages a round.
 	// void run_round();
 
-	// Friend should be able to make direct calls to ToH_Game object.
-	// friend void run_full();
+	// Game solved? Returns true if so.
+	bool solved() { return this->game->is_solved(); }
 
 	// Main Menu options.
 	static constexpr int MM_Exit{ 0 };
@@ -40,10 +37,9 @@ public:
 	static constexpr int MM_Licenses{ 2 };
 	// static constexpr int MM_About{ 3 }; // Maybe implement this later.
 
-private:
-	ToH_Game game;
-	size_t moves;
+private: 
 	char src_sel, dst_sel;
+	ToH_Game* game;
 	
 	int sel_input_state; // Represents the current input state.
 
@@ -53,6 +49,9 @@ private:
 	static constexpr int si_go{ 2 };
 
 	// Helper functions.
+
+	// Display setup questions. How many disks would you like to play with?
+	// static size_t setup_disks();
 
 	// Dispaly current state of the rods.
 	// void display_rods_state();
