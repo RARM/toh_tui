@@ -19,11 +19,27 @@ typedef struct {
 		   height = 0;
 } Window_Dimensions_Struct;
 
+// Used to share keep points in the screen.
+typedef struct {
+	size_t x = 0,
+		   y = 0;
+} FH_Point_Struct;
+
+// Game configuration to setup game.
+typedef struct {
+	size_t max_disk = 0,
+		   num_disk_selected = 0;
+	std::string player_name;
+} Game_Config_Struct;
+
 class Full_Handler
 {
 public:
 	// Setup the game.
-	// Full_Handler();
+	Full_Handler();
+
+	// The three rule of three. Is it necessary?
+	~Full_Handler();
 
 	// Manages a round.
 	// void run_round();
@@ -40,6 +56,7 @@ public:
 private: 
 	char src_sel, dst_sel;
 	ToH_Game* game;
+	std::string player_name;
 	
 	int sel_input_state; // Represents the current input state.
 
@@ -48,10 +65,16 @@ private:
 	static constexpr int si_dst{ 1 };
 	static constexpr int si_go{ 2 };
 
+	// For screen dimensions calculation.
+	static constexpr size_t info_panel_height{ 3 };
+
 	// Helper functions.
 
 	// Display setup questions. How many disks would you like to play with?
-	// static size_t setup_disks();
+	Game_Config_Struct get_game_setup();
+
+	// Get the maximum number of disks that can be used based on the current window size.
+	size_t get_maximum_nums_of_disks();
 
 	// Dispaly current state of the rods.
 	// void display_rods_state();

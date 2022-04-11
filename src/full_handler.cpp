@@ -47,12 +47,34 @@ Window_Dimensions_Struct calculate_menu_dims(const std::vector<std::string>& opt
 }
 
 /*
+* Print the Game Title in the given window.
+* Precondition: A pointer to the window is given in the argumetns along with the bottom left cornern position.
+* Post condition: It draws the game title and author taking 6 characters tall and 36 wide.
+*/
+void print_game_title(WINDOW* win, FH_Point_Struct pos) {
+    pos.x = pos.x - 36 / 2;
+
+    mvwprintw(win, pos.y - 5, pos.x, " _____ ___  _   _   _____ _   _ ___\n");
+    mvwprintw(win, pos.y - 4, pos.x, "|_   _/ _ \\| | | | |_   _| | | |_ _|\n");
+    mvwprintw(win, pos.y - 3, pos.x, "  | || | | | |_| |   | | | | | || |\n");
+    mvwprintw(win, pos.y - 2, pos.x, "  | || |_| |  _  |   | | | |_| || |\n");
+    mvwprintw(win, pos.y - 1, pos.x, "  |_| \\___/|_| |_|   |_|  \\___/|___|\n");
+    mvwprintw(win, pos.y,     pos.x, "   By Rodolfo Andres Rivas Matta");
+    
+    wrefresh(win);
+    return;
+}
+
+/*
 * Draw the menu window.
 * Precondition: Give the arguments "Window_Dimensions_Struct", options, and current_selection.
 * Postcondition: Creates and draws the menu window given the options, dimensions, and selection. 
 */
 WINDOW* create_and_draw_menu(const Window_Dimensions_Struct& dimensions, const std::vector<std::string>& options, const size_t& selection) {
     WINDOW* win = newwin(dimensions.height, dimensions.width, dimensions.starty, dimensions.startx);
+
+    FH_Point_Struct header_menu_pos {dimensions.startx + dimensions.width / 2, dimensions.starty - 2};
+    print_game_title(stdscr, header_menu_pos);
 
     wborder(win, '|', '|', '-', '-', '+', '+', '+', '+'); // draw the box borders
 
@@ -109,6 +131,7 @@ int main_menu() {
     }
 
     delwin(menu_win);
+    refresh();
 
     // convert selection to Full_Handler::MM_ constant
     switch (sel)
@@ -152,7 +175,7 @@ void display_licenses() {
 */
 void run_full() {
     int menu_sel;
-    // Full_Handler* handler;
+    Full_Handler* handler;
     
     initscr();      // start ncurses
     cbreak();       // disable input buffering
@@ -167,9 +190,9 @@ void run_full() {
         switch (menu_sel)
         {
         case Full_Handler::MM_Play:
-            // handler = new Full_Handler();
+            handler = new Full_Handler();
             // handler->play();
-            // delete handler;
+            delete handler;
             break;
         
         case Full_Handler::MM_Licenses:
@@ -183,13 +206,62 @@ void run_full() {
     endwin();       // terminate ncurses
 }
 
+
+// Unless explicitely stated, all Full Handler functions have the precondition of having ncurses initialized (it may be omitted some comments).
+
 /*
 * Full Handler Constructor
 * Precondition: ncurses must be initialized.
 * Postcondition: A new game is setup. After this, call play to run the game.
 */
-/* Full_Handler::Full_Handler()
+Full_Handler::Full_Handler()
     : src_sel{ NULL }, dst_sel{ NULL } {
-    size_t disks{ Full_Handler::setup_disks() };
+    Game_Config_Struct config = this->get_game_setup();
+    size_t disks{ config.num_disk_selected };
     this->game = new ToH_Game(disks);
-} */
+    this->player_name = config.player_name;
+}
+
+/*
+* Full Handler Destructor
+* Precondition: None.
+* Postcondition: It frees the memory allocated for the game engine.
+*/
+Full_Handler::~Full_Handler() {
+    delete this->game;
+}
+
+/*
+* Full Handler (helper function): get_game_setup
+* Precondition: ncurses must be initialized.
+* Postcondition: The complete the tasks below stated. To get the starting nu
+* 
+* Tasks:
+* - Get the maximum number of rods possible (based on the windows size).
+* - Get starting number of rods.
+* - Ask name (to display on the game over).
+*/
+Game_Config_Struct Full_Handler::get_game_setup() {
+    Game_Config_Struct config;
+
+    config.max_disk = this->get_maximum_nums_of_disks();
+
+    return config;
+}
+
+/*
+* Full Handler (helper function): get_maximum_nums_of_disks
+* Precondition: ncurses must be initialized.
+* Postcondition: Returns the maximum number of disks that can be used based
+* on the size of the stdscr window.
+*/
+size_t Full_Handler::get_maximum_nums_of_disks() {
+    // Horizontal calculation.
+    const size_t max_disk_size_hor = (COLS - 6) / 3;         // max space
+    const size_t max_disks_hor = (max_disk_size_hor + 1) / 2;  // from space to rod #
+
+    // Vertical calculation.
+    const size_t max_disks_ver = LINES - Full_Handler::info_panel_height - 6;
+
+    return (max_disks_hor < max_disks_ver) ? max_disk_size_hor : max_disks_ver;
+}
