@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <ncurses.h>
+#include <csignal>
 
 // Run game in "Full" mode.
 void run_full();
@@ -19,7 +20,7 @@ typedef struct {
 		   height = 0;
 } Window_Dimensions_Struct;
 
-// Used to share keep points in the screen.
+// Used to share keep points in the screen. The FH prefix is to distinguish it from the game engine Point_Struct.
 typedef struct {
 	size_t x = 0,
 		   y = 0;
@@ -31,6 +32,12 @@ typedef struct {
 		   num_disk_selected = 0;
 	std::string player_name;
 } Game_Config_Struct;
+
+// Data structure used to draw the setup menu.
+typedef struct {
+	Game_Config_Struct* game_config;
+	int cursor_position;
+} Setup_Draw_Config;
 
 class Full_Handler
 {
@@ -53,6 +60,13 @@ public:
 	static constexpr int MM_Licenses{ 2 };
 	// static constexpr int MM_About{ 3 }; // Maybe implement this later.
 
+	// For screen dimensions calculation.
+	static constexpr size_t info_panel_height{ 3 };
+
+	// Minimum values for screen size.
+	static constexpr size_t Screen_Min_Width{ 9 };
+	static constexpr size_t Screen_Min_Height{ 3 + Full_Handler::info_panel_height + 6 };
+
 private: 
 	char src_sel, dst_sel;
 	ToH_Game* game;
@@ -65,9 +79,6 @@ private:
 	static constexpr int si_dst{ 1 };
 	static constexpr int si_go{ 2 };
 
-	// For screen dimensions calculation.
-	static constexpr size_t info_panel_height{ 3 };
-
 	// Helper functions.
 
 	// Display setup questions. How many disks would you like to play with?
@@ -75,6 +86,11 @@ private:
 
 	// Get the maximum number of disks that can be used based on the current window size.
 	size_t get_maximum_nums_of_disks();
+
+	// Selection constants.
+	static constexpr int SMS_Disk_Num{ 1 };		// Selecting the number of disks.
+	static constexpr int SMS_Player_Name{ 2 };	// Entering the player name.
+	static constexpr int SMS_Play{ 2 };			// Selection over the play button.
 
 	// Dispaly current state of the rods.
 	// void display_rods_state();

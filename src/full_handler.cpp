@@ -54,11 +54,13 @@ Window_Dimensions_Struct calculate_menu_dims(const std::vector<std::string>& opt
 void print_game_title(WINDOW* win, FH_Point_Struct pos) {
     pos.x = pos.x - 36 / 2;
 
+    wattron(win, COLOR_PAIR(2));
     mvwprintw(win, pos.y - 5, pos.x, " _____ ___  _   _   _____ _   _ ___\n");
     mvwprintw(win, pos.y - 4, pos.x, "|_   _/ _ \\| | | | |_   _| | | |_ _|\n");
     mvwprintw(win, pos.y - 3, pos.x, "  | || | | | |_| |   | | | | | || |\n");
     mvwprintw(win, pos.y - 2, pos.x, "  | || |_| |  _  |   | | | |_| || |\n");
     mvwprintw(win, pos.y - 1, pos.x, "  |_| \\___/|_| |_|   |_|  \\___/|___|\n");
+    wattroff(win, COLOR_PAIR(2));
     mvwprintw(win, pos.y,     pos.x, "   By Rodolfo Andres Rivas Matta");
     
     wrefresh(win);
@@ -84,7 +86,9 @@ WINDOW* create_and_draw_menu(const Window_Dimensions_Struct& dimensions, const s
             mvwaddch(win, 2 + i, 4 + char_pos, options.at(i).at(char_pos));
 
     // print the arrow to show current selection
+    wattron(win, COLOR_PAIR(3) | A_BLINK);
     mvwprintw(win, selection + 1, 2, "->");
+    wattroff(win, COLOR_PAIR(3) | A_BLINK);
 
     // display the window
     refresh();
@@ -169,6 +173,18 @@ void display_licenses() {
 }
 
 /*
+* Sets the color pairs used throughout the full_run.
+*/
+void setup_color_pairs() {
+    start_color();
+    
+    // color pairs
+    init_pair(1, COLOR_WHITE, COLOR_BLACK); // Default.
+    init_pair(2, COLOR_BLUE, COLOR_BLACK); // Blue text.
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK); // Alert or attention text.
+}
+
+/*
 * Full Handler Main Entry Point
 * The run_full subroutine is the starting point for the full version.
 * It starts by whosing a menu calling other functions based on the input.
@@ -183,6 +199,10 @@ void run_full() {
     noecho();       // no need to see input
     curs_set(0);
     refresh();      // draw that black screen
+
+    setup_color_pairs(); // It is assumed the console has color capabilities.
+    attron(COLOR_PAIR(1)); // Set default.
+    wbkgd(stdscr, COLOR_PAIR(1)); // Ensure black background.
 
     while((menu_sel = main_menu()) != Full_Handler::MM_Exit) { // start the main menu
         clear(); // clear the screen before entering and after exiting a routine
@@ -232,6 +252,114 @@ Full_Handler::~Full_Handler() {
 }
 
 /*
+* Helper function: calculate the center of the window.
+* Precondition: The width and height of the window is given as arguments.
+* Postcondition: Returns a Window_Dimensions_Struct with the calculated data.
+*/
+Window_Dimensions_Struct calculate_window_dimensions(int width, int height) {
+    Window_Dimensions_Struct dimensions;
+
+    // Calculate dimensions with padding.
+    dimensions.width = width;
+    dimensions.height = height;
+
+    // Calculate position to center.
+    dimensions.startx = (COLS - dimensions.width) / 2;
+    dimensions.starty = (LINES - dimensions.height) / 2;
+
+    return dimensions;
+}
+
+/*
+* Helper function: draw the config window.
+* Precondition: The WINDOW pointer must be given as argument along with the data to display
+* in the window (review the argument list). Also, an integer representing the cursor position
+* is given as argument.
+*
+* Postcondition: It draws the window with the data given, and positions the cursor in the
+* given selection.
+*/
+void draw_setup_win(WINDOW* setup, Setup_Draw_Config setup_config) {
+    // constexpr char info[] = "Resize the window to get a different max number of disks."; // length = 57
+    constexpr int info_len = 57 + 2;
+    
+    size_t width = (COLS > info_len) ? info_len : COLS;
+    size_t height = (LINES > 12) ? 12 : LINES;
+    
+    Window_Dimensions_Struct window_dimensions{ calculate_window_dimensions(width, height) };
+    
+    /* std::vector<std::string> options {
+        "Maximum number of disks: ",
+        "Number of disks to start with: ",
+        "Player name: "
+    }; */
+
+    setup = newwin(window_dimensions.height, window_dimensions.width, window_dimensions.starty, window_dimensions.startx);
+
+    wborder(setup, '|', '|', '-', '-', '+', '+', '+', '+');
+    mvwprintw(setup, 0, 0, "Setup menu.");
+    
+    refresh();
+    wrefresh(setup);
+
+    return;
+}
+
+/*
+* Helper function: screen too small alert
+* Precondition: None.
+* Postcondition: It clears the stdscr and prints alert in it.
+*/
+void small_screen_alert() {
+    clear(); // erase and clear screen
+    mvprintw(0, 0, "Resize screen: Too small. Width = %d | Height = %d", COLS, LINES);
+    refresh();
+}
+
+/*
+* Helper function: check if the screen has minimum dimensions.
+* Precondition: None.
+* Poscondition: Returns true if min dimensions are met.
+*/
+bool min_dimensions() {
+    // return true;
+    return COLS > static_cast<int>(Full_Handler::Screen_Min_Width) && LINES > static_cast<int>(Full_Handler::Screen_Min_Height);
+}
+
+/*
+* Helper function: draw screen or alert
+* Precondition:
+* Postcondition: draws the setup menu or the alert screen based on the inputs and screen size.
+*/
+void setup_screen_or_alert(WINDOW* setup_window, Setup_Draw_Config setup_config, bool &setup_draw, bool &cursor_visible) {
+    if (min_dimensions()) { // draw screen
+        if (!cursor_visible) {
+            curs_set(1); // show cursor
+            cursor_visible = true;
+        }
+        
+        if (setup_draw)
+            delwin(setup_window);
+        else
+            setup_draw = true;
+
+        draw_setup_win(setup_window, setup_config); // draw the menu
+    } else { // draw alert
+        if (setup_draw) {
+            delwin(setup_window);
+            setup_draw = false;
+        }
+
+        if (cursor_visible) {
+            curs_set(0); // invisible for the alert box
+            cursor_visible = false;
+        }
+        
+        small_screen_alert();
+    }
+}
+
+/*
 * Full Handler (helper function): get_game_setup
 * Precondition: ncurses must be initialized.
 * Postcondition: The complete the tasks below stated. To get the starting nu
@@ -242,9 +370,56 @@ Full_Handler::~Full_Handler() {
 * - Ask name (to display on the game over).
 */
 Game_Config_Struct Full_Handler::get_game_setup() {
+    WINDOW* setup_win = nullptr;
+    
     Game_Config_Struct config;
-
     config.max_disk = this->get_maximum_nums_of_disks();
+    
+    int user_input;
+    bool setup_draw{ false }; // flag to know if setup menu has been drawn
+    bool cursor_visible{ false }; // flag to know if cursors is visible or not
+    bool done{ false };
+
+    Setup_Draw_Config setup_menu_config; 
+    setup_menu_config.game_config = &config;
+    setup_menu_config.cursor_position = Full_Handler::SMS_Disk_Num;
+
+    // FIXME: add timeout to have a portable solution to resize
+
+    setup_screen_or_alert(setup_win, setup_menu_config, setup_draw, cursor_visible); // draw screen
+    
+    // FIXME: The logic to come out of the config menu loop has to be fixed.
+    while (/*setup_menu_config.cursor_position != Full_Handler::SMS_Play && (user_input = getch()) != '\n'*/ !done)
+    {
+        user_input = getch();
+        switch (user_input)
+        {
+        case KEY_UP:
+            setup_menu_config.cursor_position -= (setup_menu_config.cursor_position == Full_Handler::SMS_Disk_Num) ? 0 : 1;
+            break;
+
+        case KEY_DOWN:
+            setup_menu_config.cursor_position += (setup_menu_config.cursor_position == Full_Handler::SMS_Play) ? 0 : 1;
+            break;
+        
+        case KEY_RESIZE:
+            // clear(); // https://stackoverflow.com/questions/13707137/resizing-glitch-with-ncurses?rq=1
+            config.max_disk = this->get_maximum_nums_of_disks();
+            break;
+
+        case 'q':
+            done = true;
+            break;
+        
+        /* default:
+            break; */
+        }
+
+        setup_screen_or_alert(setup_win, setup_menu_config, setup_draw, cursor_visible);
+    }
+    
+
+    curs_set(0); // return cursor to invisible
 
     return config;
 }
