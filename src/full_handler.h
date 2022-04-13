@@ -6,6 +6,7 @@
 #include <ncurses.h>
 
 #include <chrono>
+#include <string>
 
 // Run game in "Full" mode.
 void run_full();
@@ -23,7 +24,7 @@ void run_full();
 class Round
 {
 private:
-    // Time members.
+    // Time members. These are set on the play call.
     std::chrono::duration<std::chrono::system_clock::rep> saved_duration;   // saved for a paused game
     std::chrono::time_point<std::chrono::system_clock> start_time;          // for duration calculations
     std::chrono::duration<int> seconds; // total time: seconds (up to 60)
@@ -35,6 +36,7 @@ private:
     int disk_pos;   // a ToH_Game::rod_ representing the position where the source disk is being holded
     int src_disk;   // a ToH_Game::rod_ constant representing the source disk
     int dst_disk;   // a ToH_Game::rod_ constant representing the destination disk
+    std::string player_name;
 
     // Calculate and save the time (minutes and seconds) based on the start_time + saved duration.
     void update_time_elapsed();
@@ -46,8 +48,8 @@ private:
     void process(int key_input);
 
 public:
-    Round(size_t amount_of_disks = 3);
-    ~Round();
+    // Round constructor.
+    Round(const std::string& player_name, const size_t& amount_of_disks = 3);
 
     // Play the round (from start to puzzle solved).
     void play();
