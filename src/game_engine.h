@@ -93,9 +93,10 @@ public:
 
 	// Constants representing each rod.
 	
-	static constexpr int rod_A{ 0 };
-	static constexpr int rod_B{ 1 };
-	static constexpr int rod_C{ 2 };
+	static constexpr int rod_NULL{ 0 };
+	static constexpr int rod_A{ 1 };
+	static constexpr int rod_B{ 2 };
+	static constexpr int rod_C{ 3 };
 
 	// Get the total amount of moves so far.
 	size_t get_moves() { return this->moves; }

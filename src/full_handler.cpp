@@ -25,6 +25,10 @@ Round::Round(const std::string& player_name, const size_t& amount_of_disks, int 
     : game_engine{ amount_of_disks }, player_name{ player_name }, refresh_rate{ fps } {
         this->saved_duration = std::chrono::duration<std::chrono::system_clock::rep>(0); // This will be implemented later.
         // FIXME: initialize game mechanics
+
+        // Game mechanics initialization.
+        this->holding_disk = false;
+        this->disk_pos = ToH_Game::rod_NULL;
     }
 
 /* Round Class: play
