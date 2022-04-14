@@ -97,7 +97,7 @@ private:
 
     // Color constants. Used for styles.
     static constexpr short color_board{ 10 };  // used for the board
-    static constexpr short color_disk{ 10 };   // used for the disks
+    static constexpr short color_disk{ 11 };   // used for the disks
 
     // Process user input (update game values) or do nothing if NULL.
     void process(int key_input);

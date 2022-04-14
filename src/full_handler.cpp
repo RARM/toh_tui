@@ -165,6 +165,8 @@ void Round::draw_info() {
     std::string sec_str;
     std::string min_str;
 
+    werase(this->info_window);
+
     // Draw the name.
     mvwprintw(this->info_window, 0, 0, " Player: %s", this->player_name.c_str());
 
@@ -210,9 +212,14 @@ void remove_first(std::vector<unsigned>& v) {
  */
 std::string get_disk_rep(unsigned disk_id) {
     std::string disk_rep;
+    std::string disk_num;
     int disk_width{ Round::get_disk_dimension(disk_id) };
 
     for (int i{ disk_width }; i > 0; i--) disk_rep += " ";
+
+    // Print the number in the disk.
+    disk_num = std::to_string(disk_id);
+    for (unsigned i{ 0 }; i < disk_num.size(); i++) disk_rep.at(disk_rep.size() / 2 + i) = disk_num.at(i);
 
     return disk_rep;
 }
