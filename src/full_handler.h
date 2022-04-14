@@ -52,8 +52,8 @@ private:
     ToH_Game game_engine;   // instance of the game mechanics
     bool holding_disk;      // flag for displaying source as holded (for the tui)
     int disk_pos;   // a ToH_Game::rod_ representing the position where the source disk is being holded
-    int src_disk;   // a ToH_Game::rod_ constant representing the source disk
-    int dst_disk;   // a ToH_Game::rod_ constant representing the destination disk
+    int src_rod;   // a ToH_Game::rod_ constant representing the source rod
+    int dst_rod;   // a ToH_Game::rod_ constant representing the destination rod
     std::string player_name;
     const int refresh_rate; // recommended 10 Hz
     bool done;      // used for game loop 

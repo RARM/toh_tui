@@ -30,8 +30,8 @@ Round::Round(const std::string& player_name, const size_t& amount_of_disks, int 
         // Game mechanics initialization.
         this->holding_disk = false;
         this->disk_pos = ToH_Game::rod_A;
-        this->src_disk = ToH_Game::rod_NULL;
-        this->dst_disk = ToH_Game::rod_NULL;
+        this->src_rod = ToH_Game::rod_NULL;
+        this->dst_rod = ToH_Game::rod_NULL;
     }
 
 /* Round Class: play
@@ -200,8 +200,8 @@ void Round::draw_info() {
  * This is used in removing the holded disk from the stack.
  */
 void remove_first(std::vector<unsigned>& v) {
-    for (size_t i{ v.size() }; i > 0; i--)
-        v.at(i - 2) = v.at(i - 1);
+    for (size_t i{ 0 }; i < v.size() - 1; i++)
+        v.at(i) = v.at(i + 1);
     
     v.pop_back();
 }
@@ -233,7 +233,8 @@ void Round::draw_disks() {
     std::string board_base;
     int rod_A_pos, rod_B_pos, rod_C_pos; // horizontal positions
     int hold_pos; // hold position
-    Rods board_state;
+    unsigned hold_disk_id; // id representing the holded disk
+    Rods board_state{ this->game_engine.get_state() };
 
     int disks_num = this->game_engine.get_disk_num(); // amount of disks
     int largest_disk_width = Round::get_disk_dimension(disks_num);
@@ -278,26 +279,37 @@ void Round::draw_disks() {
     }
 
     if (this->holding_disk) { // reusing board_base to draw the disk
-        board_base = "";
-        for (int i{ 0 }; i < Round::get_disk_dimension(this->src_disk); i++) board_base += " ";
+        switch (this->src_rod) {
+        case ToH_Game::rod_A:
+            board_base = get_disk_rep(board_state.A.at(0));
+            hold_disk_id = board_state.A.at(0);
+            break;
         
-        if (Round::get_disk_dimension(this->src_disk) % 2 == 0) wattron(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
+        case ToH_Game::rod_B:
+            board_base = get_disk_rep(board_state.B.at(0));
+            hold_disk_id = board_state.B.at(0);
+            break;
+        
+        case ToH_Game::rod_C:
+            board_base = get_disk_rep(board_state.C.at(0));
+            hold_disk_id = board_state.C.at(0);
+            break;
+        }
+        
+        if (hold_disk_id % 2 == 0) wattron(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
         else wattron(this->disks_window, COLOR_PAIR(Round::color_disk));
 
-        mvwprintw(this->disks_window, 0, hold_pos - Round::get_disk_dimension(this->src_disk) / 2, "%s", board_base.c_str());
+        mvwprintw(this->disks_window, 0, hold_pos - board_base.size() / 2, "%s", board_base.c_str());
 
-        if (Round::get_disk_dimension(this->src_disk) % 2 == 0) wattroff(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
+        if (hold_disk_id % 2 == 0) wattroff(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
         else wattroff(this->disks_window, COLOR_PAIR(Round::color_disk));
 
     } else
         mvwprintw(this->disks_window, 0, hold_pos, "^");
 
     // Printing the disks in the roads.
-    board_state = this->game_engine.get_state();
-
     if (this->holding_disk) {
-        switch (this->src_disk)
-        {
+        switch (this->src_rod) {
         case ToH_Game::rod_A:
             remove_first(board_state.A);
             break;
@@ -357,6 +369,8 @@ void Round::draw_controls_board() {
  * Postcondition: Updates the game based on the input.
  */
 void Round::process(int key_input) {
+    Rods game_state{ this->game_engine.get_state() };
+    
     switch (key_input)
     {
     case KEY_RIGHT:
@@ -365,6 +379,26 @@ void Round::process(int key_input) {
 
     case KEY_LEFT:
         this->disk_pos -= (this->disk_pos == ToH_Game::rod_A) ? 0 : 1;
+        break;
+    
+    case '\n': // enter
+        if (this->holding_disk) {
+            this->holding_disk = false;
+        } else {
+            this->holding_disk = true;
+            switch (this->disk_pos) { // save the id of the src rod
+            case ToH_Game::rod_A:
+                this->src_rod = ToH_Game::rod_A;
+                break;
+            case ToH_Game::rod_B:
+                this->src_rod = ToH_Game::rod_B;
+                break;
+            case ToH_Game::rod_C:
+                this->src_rod = ToH_Game::rod_C;
+                break;
+            }
+        }
+        
         break;
     
     case 'q':
