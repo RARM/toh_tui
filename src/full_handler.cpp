@@ -382,26 +382,32 @@ void Round::process(int key_input) {
         break;
     
     case '\n': // enter
-        if (this->holding_disk) {
+        if (this->holding_disk) { // make the move
+            this->game_engine.move(this->src_rod, this->disk_pos);
             this->holding_disk = false;
         } else {
-            this->holding_disk = true;
             switch (this->disk_pos) { // save the id of the src rod
             case ToH_Game::rod_A:
-                this->src_rod = ToH_Game::rod_A;
+                this->src_rod = (game_state.A.size() > 0) ? ToH_Game::rod_A : ToH_Game::rod_NULL;
                 break;
             case ToH_Game::rod_B:
-                this->src_rod = ToH_Game::rod_B;
+                this->src_rod = (game_state.B.size() > 0) ? ToH_Game::rod_B : ToH_Game::rod_NULL;
                 break;
             case ToH_Game::rod_C:
-                this->src_rod = ToH_Game::rod_C;
+                this->src_rod = (game_state.C.size() > 0) ? ToH_Game::rod_C : ToH_Game::rod_NULL;
                 break;
             }
+
+            this->holding_disk = (this->src_rod != ToH_Game::rod_NULL) ? true : false;
         }
-        
+        break;
+
+    case 'a':
+    case 'A':
         break;
     
     case 'q':
+    case 'Q':
         this->done = true;
         break;
     }
