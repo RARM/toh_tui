@@ -105,11 +105,13 @@ void Round::init_scrns() {
  * Postcondition: Initializes the colors used throughout the game if they haven't been already.
  */
 void Round::ncurses_setup() {
+    keypad(stdscr, TRUE);
+
     // FIXME: add colors.
     start_color();
     init_pair(Round::color_board, COLOR_BLACK, COLOR_WHITE);   // black letters, white background
     init_pair(Round::color_disk, COLOR_BLACK, COLOR_CYAN);   // black letters, blue background
-    
+
     return;
 }
 
@@ -229,6 +231,8 @@ void Round::draw_disks() {
     int disks_num = this->game_engine.get_disk_num(); // amount of disks
     int largest_disk_width = Round::get_disk_dimension(disks_num);
 
+    werase(this->disks_window); // CLEAR WINDOW
+
     // Get the position of the rods (horizontally).
     rod_A_pos = 1 + largest_disk_width / 2;
     rod_B_pos = rod_A_pos + largest_disk_width + 1;
@@ -346,8 +350,20 @@ void Round::draw_controls_board() {
  * Postcondition: Updates the game based on the input.
  */
 void Round::process(int key_input) {
-    if (key_input == 'q') this->done = true;
-    // FIXME:: implement
+    switch (key_input)
+    {
+    case KEY_RIGHT:
+        this->disk_pos += (this->disk_pos == ToH_Game::rod_C) ? 0 : 1;
+        break;
+
+    case KEY_LEFT:
+        this->disk_pos -= (this->disk_pos == ToH_Game::rod_A) ? 0 : 1;
+        break;
+    
+    case 'q':
+        this->done = true;
+        break;
+    }
     return;
 }
 
@@ -356,6 +372,5 @@ void Round::process(int key_input) {
  * Postcondition: The width of the disk is returned.
  */
 int Round::get_disk_dimension(int disk_number) {
-    // FIXME: revise implementation for better visibility.
-    return disk_number * 4 - 1;
+    return disk_number * 4 - 1; // width of the disk
 }
