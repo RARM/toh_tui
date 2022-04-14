@@ -23,12 +23,15 @@ void run_full() {
  */
 Round::Round(const std::string& player_name, const size_t& amount_of_disks, int fps)
     : game_engine{ amount_of_disks }, player_name{ player_name }, refresh_rate{ fps } {
-        this->saved_duration = std::chrono::duration<std::chrono::system_clock::rep>(0); // This will be implemented later.
-        // FIXME: initialize game mechanics
+
+        // saved_duration: This will be implemented later. This is used to restore a saved game.
+        this->saved_duration = std::chrono::duration<std::chrono::system_clock::rep>(0); 
 
         // Game mechanics initialization.
         this->holding_disk = false;
-        this->disk_pos = ToH_Game::rod_NULL;
+        this->disk_pos = ToH_Game::rod_A;
+        this->src_disk = ToH_Game::rod_NULL;
+        this->dst_disk = ToH_Game::rod_NULL;
     }
 
 /* Round Class: play
@@ -83,8 +86,8 @@ void Round::init_scrns() {
 
     // Initialize the rods and disks window.
     int disks_num = this->game_engine.get_disk_num(); // amount of disks
-    int larger_disk_width = Round::get_disk_dimension(disks_num);
-    this->dw_dimensions.width = disks_num * larger_disk_width + 4; // 4 because there is a space in between each rod
+    int largest_disk_width = Round::get_disk_dimension(disks_num);
+    this->dw_dimensions.width = disks_num * largest_disk_width + 4; // 4 because there is a space in between each rod
     this->dw_dimensions.height = disks_num + 3;
 
     int dw_starty = cbw_starty - 1 - this->dw_dimensions.height;
@@ -92,6 +95,21 @@ void Round::init_scrns() {
 
     this->disks_window = newwin(this->dw_dimensions.height, this->dw_dimensions.width, dw_starty, dw_startx);
 
+    this->ncurses_setup();
+
+    return;
+}
+
+/* Round: ncurses_setup
+ * Precondition: None.
+ * Postcondition: Initializes the colors used throughout the game if they haven't been already.
+ */
+void Round::ncurses_setup() {
+    // FIXME: add colors.
+    start_color();
+    init_pair(Round::color_board, COLOR_BLACK, COLOR_WHITE);   // black letters, white background
+    init_pair(Round::color_disk, COLOR_BLACK, COLOR_CYAN);   // black letters, blue background
+    
     return;
 }
 
@@ -171,13 +189,147 @@ void Round::draw_info() {
     return;
 }
 
+/* remove_first
+ * Precondition: A vector is given as argument.
+ * Postcondition: All elements are moven down 1 space and the lastone poped.
+ * 
+ * This is used in removing the holded disk from the stack.
+ */
+void remove_first(std::vector<unsigned>& v) {
+    for (size_t i{ v.size() }; i > 0; i--)
+        v.at(i - 2) = v.at(i - 1);
+    
+    v.pop_back();
+}
+
+/* get_disk_rep
+ * Precondition: An integer representing the disk ID is given as argument.
+ * Postcondition: A string representing the drawing of the disk is returned.
+ */
+std::string get_disk_rep(unsigned disk_id) {
+    std::string disk_rep;
+    int disk_width{ Round::get_disk_dimension(disk_id) };
+
+    for (int i{ disk_width }; i > 0; i--) disk_rep += " ";
+
+    return disk_rep;
+}
+
 /* Round: draw_disks
  * Precondition: All game mechanics members must be initialized.
  * Postcondition: Draws all the disks and game in the disks_window.
  */
 void Round::draw_disks() {
-    // FIXME: implement
+    // FIXME: complete implementation
+    std::string board_base;
+    int rod_A_pos, rod_B_pos, rod_C_pos; // horizontal positions
+    int hold_pos; // hold position
+    Rods board_state;
+
+    int disks_num = this->game_engine.get_disk_num(); // amount of disks
+    int largest_disk_width = Round::get_disk_dimension(disks_num);
+
+    // Get the position of the rods (horizontally).
+    rod_A_pos = 1 + largest_disk_width / 2;
+    rod_B_pos = rod_A_pos + largest_disk_width;
+    rod_C_pos = rod_B_pos + largest_disk_width;
+
+    // Draw board.
+    for (int i{ 0 }; i < this->dw_dimensions.width; i++) // get a string the same length of the base
+        board_base += " ";
+    
+    wattron(this->disks_window, COLOR_PAIR(Round::color_board) | A_DIM); // dimmed white color
+    mvwprintw(this->disks_window, this->dw_dimensions.height - 1, 0, "%s", board_base.c_str());
+    mvwprintw(this->disks_window, this->dw_dimensions.height - 1, rod_A_pos, "A");
+    mvwprintw(this->disks_window, this->dw_dimensions.height - 1, rod_B_pos, "B");
+    mvwprintw(this->disks_window, this->dw_dimensions.height - 1, rod_C_pos, "C");
+    wattroff(this->disks_window, COLOR_PAIR(Round::color_board) | A_DIM); // dimmed white color
+
+    // Rods
+    for (size_t i{ 0 }; i <= this->game_engine.get_disk_num(); i++) mvwprintw(this->disks_window, this->dw_dimensions.height - 2 - i, rod_A_pos, "I");
+    for (size_t i{ 0 }; i <= this->game_engine.get_disk_num(); i++) mvwprintw(this->disks_window, this->dw_dimensions.height - 2 - i, rod_B_pos, "I");
+    for (size_t i{ 0 }; i <= this->game_engine.get_disk_num(); i++) mvwprintw(this->disks_window, this->dw_dimensions.height - 2 - i, rod_C_pos, "I");
+
+    // Draw holded row or signal character.
+    switch (this->disk_pos)
+    {
+    case ToH_Game::rod_A:
+        hold_pos = rod_A_pos;
+        break;
+    
+    case ToH_Game::rod_B:
+        hold_pos = rod_B_pos;
+        break;
+    
+    case ToH_Game::rod_C:
+        hold_pos = rod_C_pos;
+        break;
+    }
+
+    if (this->holding_disk) { // reusing board_base to draw the disk
+        board_base = "";
+        for (int i{ 0 }; i < Round::get_disk_dimension(this->src_disk); i++) board_base += " ";
+        
+        if (Round::get_disk_dimension(this->src_disk) % 2 == 0) wattron(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
+        else wattron(this->disks_window, COLOR_PAIR(Round::color_disk));
+
+        mvwprintw(this->disks_window, 0, hold_pos - Round::get_disk_dimension(this->src_disk) / 2, "%s", board_base.c_str());
+
+        if (Round::get_disk_dimension(this->src_disk) % 2 == 0) wattroff(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
+        else wattroff(this->disks_window, COLOR_PAIR(Round::color_disk));
+
+    } else
+        mvwprintw(this->disks_window, 0, hold_pos, "^");
+
+    // Printing the disks in the roads.
+    board_state = this->game_engine.get_state();
+
+    if (this->holding_disk) {
+        switch (this->src_disk)
+        {
+        case ToH_Game::rod_A:
+            remove_first(board_state.A);
+            break;
+        
+        case ToH_Game::rod_B:
+            remove_first(board_state.B);
+            break;
+        
+        case ToH_Game::rod_C:
+            remove_first(board_state.C);
+            break;
+        }
+    }
+
+    this->draw_rod_disks(rod_A_pos, board_state.A);
+    this->draw_rod_disks(rod_B_pos, board_state.B);
+    this->draw_rod_disks(rod_C_pos, board_state.C);
+
+    wrefresh(this->disks_window);
+
     return;
+}
+
+/* Round: draw_rod_disks
+ * Precondition: The position of the rod (horizontally) and the vector representing the disks must be given as arguments.
+ * Postcondition: It updates the disks_window to contain the disks. It does not refresh the window.
+ */
+void Round::draw_rod_disks(const int& rod_pos, std::vector<unsigned>& disks) {
+    int disk_width;
+    std::string disk_rep;
+    
+    for (size_t i{ disks.size() }; i > 0; i--) {
+        disk_width = Round::get_disk_dimension(static_cast<int>(disks.at(i - 1)));
+        disk_rep =  get_disk_rep(disks.at(i - 1));
+
+        if (disks.at(i - 1) % 2 == 0) wattron(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM); // for different color disks
+        else wattron(this->disks_window, COLOR_PAIR(Round::color_disk));
+        
+        mvwprintw(this->disks_window, this->dw_dimensions.height - 2 - (disks.size() - i), rod_pos - disk_width / 2, "%s", disk_rep.c_str());
+
+        if (disks.at(i - 1) % 2 == 0) wattroff(this->disks_window, COLOR_PAIR(Round::color_disk) | A_DIM);
+        else wattroff(this->disks_window, COLOR_PAIR(Round::color_disk));
+    }
 }
 
 /* Round: draw_controls_board
@@ -205,5 +357,5 @@ void Round::process(int key_input) {
  */
 int Round::get_disk_dimension(int disk_number) {
     // FIXME: revise implementation for better visibility.
-    return disk_number * 2 - 1;
+    return disk_number * 4 - 1;
 }

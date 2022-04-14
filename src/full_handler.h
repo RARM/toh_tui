@@ -74,10 +74,13 @@ private:
     // Initializes all the windows.
     void init_scrns();
 
+    // Setup ncurses variables like colors. Call only once after ncurses initialization.
+    void ncurses_setup();
+
     // Destroy all windows (layout).
     void del_scrns();
 
-    // Draw the game in the screen based on member values.
+    // Draw the game in the screen based on member values. (Note: ncurses color pairs 100-124 are reserved for the draw functions.)
     void draw();
 
     // Draws info_bar window. 
@@ -86,8 +89,15 @@ private:
     // Draw the rods and disks in the disks_window and refresh.
     void draw_disks();
 
+    // Routine for drawing the disks in a rod.
+    void draw_rod_disks(const int& rod_pos, std::vector<unsigned>& disk_ids);
+
     // Draw the information in the controls_board_window and refresh.
     void draw_controls_board();
+
+    // Color constants. Used for styles.
+    static constexpr short color_board{ 10 };  // used for the board
+    static constexpr short color_disk{ 10 };   // used for the disks
 
     // Process user input (update game values) or do nothing if NULL.
     void process(int key_input);
