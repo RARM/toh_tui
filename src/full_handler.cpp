@@ -6,7 +6,7 @@
  */
 void run_full() {
     // TESTING.
-    Round game("Rodolfo");
+    Round game("Rodolfo", 5);
 
     initscr();
 
@@ -87,7 +87,7 @@ void Round::init_scrns() {
     // Initialize the rods and disks window.
     int disks_num = this->game_engine.get_disk_num(); // amount of disks
     int largest_disk_width = Round::get_disk_dimension(disks_num);
-    this->dw_dimensions.width = disks_num * largest_disk_width + 4; // 4 because there is a space in between each rod
+    this->dw_dimensions.width = 3 * largest_disk_width + 4; // 4 because there is a space in between each rod
     this->dw_dimensions.height = disks_num + 3;
 
     int dw_starty = cbw_starty - 1 - this->dw_dimensions.height;
@@ -231,8 +231,8 @@ void Round::draw_disks() {
 
     // Get the position of the rods (horizontally).
     rod_A_pos = 1 + largest_disk_width / 2;
-    rod_B_pos = rod_A_pos + largest_disk_width;
-    rod_C_pos = rod_B_pos + largest_disk_width;
+    rod_B_pos = rod_A_pos + largest_disk_width + 1;
+    rod_C_pos = rod_B_pos + largest_disk_width + 1;
 
     // Draw board.
     for (int i{ 0 }; i < this->dw_dimensions.width; i++) // get a string the same length of the base
