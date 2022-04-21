@@ -113,7 +113,7 @@ public:
     static int get_disk_dimension(int disk_num);
 
     // Get maximum amount of disks possible for the current screen size.
-    // static unsigned get_maximum_disks();
+    static unsigned get_maximum_disks();
 
     // Save the game state. (To implement later.)
     // Game_Data save();

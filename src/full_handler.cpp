@@ -12,7 +12,12 @@ void run_full() {
     // TESTING.
     initscr();
 
-    Round game("Rodolfo", 7);
+    printw("Maximum amount of disks: %u", Round::get_maximum_disks());
+
+    getch();
+    clear();
+
+    Round game("Rodolfo", 16);
     game.play();
 
     endwin();
@@ -82,7 +87,7 @@ void Round::init_scrns() {
     this->info_window = newwin(this->iw_dimensions.height, this->iw_dimensions.width, 0, 0); // top
 
     // Initialize the controls board.
-    this->cbw_dimensions.height = 3;
+    this->cbw_dimensions.height = 1; // the bottom bar
     this->cbw_dimensions.width = COLS - 2; // a border space on each side
     int cbw_starty = LINES - this->cbw_dimensions.height - 1;
     this->controls_board_window = newwin(this->cbw_dimensions.height, this->cbw_dimensions.width, cbw_starty, 1);
@@ -416,6 +421,32 @@ void Round::process(int key_input) {
         break;
     }
     return;
+}
+
+/* Round: get_maximum_disks
+ * Precondition: ncurses must be initialized.
+ * Postcondition: It returns an unsigned number representing the maximum amount of disks that the game can have.
+ */
+unsigned Round::get_maximum_disks() {
+    unsigned maximum;
+    int max_disks_horizontally;
+
+    // each disk utilizes one space vertically
+    // height - 1 (info bar) - 1 (control board) - 2 (disks window top and bottom margins) - 3 (internal constant spaces)
+    const int max_disks_vertically = LINES - 1 - 1 - 2 - 3;
+
+    // each disk utilizes width_available / 3 since the same space is utilized for each rod
+    // width - 2 (disks window margin) - 4 (spaces in between each disk)
+    const int max_width = COLS - 2 - 4;
+
+    // brute force calculation
+    for (max_disks_horizontally = 0; max_width > (Round::get_disk_dimension(max_disks_horizontally) * 3); max_disks_horizontally++);
+    max_disks_horizontally--;
+
+    // which offers less space?
+    maximum = (max_disks_horizontally < max_disks_vertically) ? max_disks_horizontally : max_disks_vertically ;
+
+    return maximum;
 }
 
 /* Round: get_disk_dimension
