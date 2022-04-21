@@ -5,11 +5,14 @@
  * Postcondition: This subroutine uses all the elements in the Full_Handler library to run an instance of the ToH_TUI game.
  */
 void run_full() {
-    // TESTING.
-    Round game("Rodolfo", 5);
+    /* Full_Handler ha;
 
+    ha.main_menu(); */
+
+    // TESTING.
     initscr();
 
+    Round game("Rodolfo", 7);
     game.play();
 
     endwin();
@@ -90,7 +93,7 @@ void Round::init_scrns() {
     this->dw_dimensions.width = 3 * largest_disk_width + 4; // 4 because there is a space in between each rod
     this->dw_dimensions.height = disks_num + 3;
 
-    int dw_starty = cbw_starty - 1 - this->dw_dimensions.height;
+    int dw_starty = (LINES - this->dw_dimensions.height) / 2; // centered
     int dw_startx = (COLS - this->dw_dimensions.width) / 2; // for horizontal centering
 
     this->disks_window = newwin(this->dw_dimensions.height, this->dw_dimensions.width, dw_starty, dw_startx);
@@ -382,6 +385,7 @@ void Round::process(int key_input) {
         break;
     
     case '\n': // enter
+    case ' ':  // backspace
         if (this->holding_disk) { // make the move
             this->game_engine.move(this->src_rod, this->disk_pos);
             this->holding_disk = false;
@@ -421,3 +425,10 @@ void Round::process(int key_input) {
 int Round::get_disk_dimension(int disk_number) {
     return disk_number * 4 - 1; // width of the disk
 }
+
+/* Full_Handler Constructor
+ * Preconditions: None.
+ * Postconditions: Initializes the full handler object (not much is done). 
+ */
+Full_Handler::Full_Handler()
+: player_name(""), disks_amount(0u), cursor_position(0) {}

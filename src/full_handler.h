@@ -112,8 +112,49 @@ public:
     // Get the disk dimension. Used moslty for graphic calculations.
     static int get_disk_dimension(int disk_num);
 
+    // Get maximum amount of disks possible for the current screen size.
+    // static unsigned get_maximum_disks();
+
     // Save the game state. (To implement later.)
     // Game_Data save();
+};
+
+/* Full Handler
+ * Simple interface to initialize and manage the game (e.g. game main menu and setup).
+ */
+class Full_Handler
+{
+private:
+    // Game data.
+    std::string player_name;
+    unsigned disks_amount;
+    
+    // Windows handlers.
+    int cursor_position;
+
+    // Constants for menu processing.
+
+public:
+    Full_Handler();
+    ~Full_Handler();
+
+    // Display the main menu. Returns a constant representing the current selection.
+    // int main_menu();
+
+    // Selection constants.
+    static constexpr int Exit{ 0 };
+    static constexpr int Setup{ 1 };
+    static constexpr int Play{ 2 };
+    static constexpr int About{ 3 };
+
+    // Diplay the setup screen. Updates the game data values.
+    // void setup();
+
+    // Start a game. Uses the game data in the object to call the game.
+    // void play();
+
+    // Display the "About" information.
+    // void about();
 };
 
 #endif
