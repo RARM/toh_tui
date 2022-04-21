@@ -80,7 +80,7 @@ private:
     // Destroy all windows (layout).
     void del_scrns();
 
-    // Draw the game in the screen based on member values. (Note: ncurses color pairs 100-124 are reserved for the draw functions.)
+    // Draw the game in the screen based on member values. (Note: ncurses color pairs 10-11 are reserved for the draw functions.)
     void draw();
 
     // Draws info_bar window. 
@@ -132,20 +132,30 @@ private:
     // Windows handlers.
     int cursor_position;
 
-    // Constants for menu processing.
+    // Helper functions.
+
+    // Draw banne for the main menu.
+    void mm_banner_draw(WINDOW* banner_win);
+
+    // Draw menu based on the cursor position.
+    void mm_draw_selection(WINDOW* selection_win);
+
+    // Color pair used for ncurses drawings (Full_Handler reserves pairs 1 to 5);
+    static constexpr short color_banner{ 1 };   // used to display the banner in the main menu
+    static constexpr short color_menu_sel{ 2 }; // used to display the selector arrow in the main menu
 
 public:
     Full_Handler();
     ~Full_Handler();
 
     // Display the main menu. Returns a constant representing the current selection.
-    // int main_menu();
+    int main_menu();
 
     // Selection constants.
-    static constexpr int Exit{ 0 };
-    static constexpr int Setup{ 1 };
-    static constexpr int Play{ 2 };
-    static constexpr int About{ 3 };
+    static constexpr int MM_Play{ 1 };
+    static constexpr int MM_About{ 2 };
+    static constexpr int MM_Exit{ 3 };
+    static constexpr int MM_Setup{ 4 };
 
     // Diplay the setup screen. Updates the game data values.
     // void setup();

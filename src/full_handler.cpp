@@ -5,11 +5,11 @@
  * Postcondition: This subroutine uses all the elements in the Full_Handler library to run an instance of the ToH_TUI game.
  */
 void run_full() {
-    /* Full_Handler ha;
+    Full_Handler ha;
 
-    ha.main_menu(); */
+    ha.main_menu();
 
-    // TESTING.
+    /* // TESTING.
     initscr();
 
     printw("Maximum amount of disks: %u", Round::get_maximum_disks());
@@ -20,7 +20,7 @@ void run_full() {
     Round game("Rodolfo", 16);
     game.play();
 
-    endwin();
+    endwin();*/
 
     return;
 }
@@ -115,8 +115,8 @@ void Round::init_scrns() {
 void Round::ncurses_setup() {
     keypad(stdscr, TRUE);
 
-    // FIXME: add colors.
-    start_color();
+    // Adding color pairs. Colors must be initialized.
+    // start_color();
     init_pair(Round::color_board, COLOR_BLACK, COLOR_WHITE);   // black letters, white background
     init_pair(Round::color_disk, COLOR_BLACK, COLOR_CYAN);   // black letters, blue background
 
@@ -459,7 +459,127 @@ int Round::get_disk_dimension(int disk_number) {
 
 /* Full_Handler Constructor
  * Preconditions: None.
- * Postconditions: Initializes the full handler object (not much is done). 
+ * Postconditions: Initializes the full handler object, ncurses, and colors pairs for ncurses. 
  */
 Full_Handler::Full_Handler()
-: player_name(""), disks_amount(0u), cursor_position(0) {}
+: player_name(""), disks_amount(0u), cursor_position(0) {
+    initscr();
+    start_color();
+    cbreak();
+    noecho();
+    keypad(stdscr, true);
+    
+    // colors
+    init_pair(Full_Handler::color_banner, COLOR_BLUE, COLOR_BLACK);
+    init_pair(Full_Handler::color_menu_sel, COLOR_YELLOW, COLOR_BLACK);
+}
+
+/* Full_Handler Destructor
+ * Precondition: None.
+ * Postcondition: ncurses is terminated.
+ */
+Full_Handler::~Full_Handler() {
+    endwin();
+}
+
+/* Full_Handler: mm_banner_draw
+ * Precondition: Screen must be clean and ready to draw the main menu. A pointer to the banner window with dimensions (5 height and 36 width) must
+ * be given as argument.
+ * Postcondition: It will print the banner for the main menu.
+ */
+void Full_Handler::mm_banner_draw(WINDOW* win) {
+    wattron(win, COLOR_PAIR(Full_Handler::color_banner));
+    mvwprintw(win, 0, 0, " _____ ___  _   _   _____ _   _ ___\n");
+    mvwprintw(win, 1, 0, "|_   _/ _ \\| | | | |_   _| | | |_ _|\n");
+    mvwprintw(win, 2, 0, "  | || | | | |_| |   | | | | | || |\n");
+    mvwprintw(win, 3, 0, "  | || |_| |  _  |   | | | |_| || |\n");
+    mvwprintw(win, 4, 0, "  |_| \\___/|_| |_|   |_|  \\___/|___|\n");
+    wattroff(win, COLOR_PAIR(Full_Handler::color_banner));
+    
+    wrefresh(win);
+    return;
+}
+
+/* Full_Handler: mm_draw_selection
+ * Precondition: A window pointer with the dimensions (widht = 11, height = 9) must be given as argument.
+ * Poscondition: The window is draw using the current window position.
+ */
+void Full_Handler::mm_draw_selection(WINDOW* win) {
+    Point_Structure cursor;
+    cursor.x = 2;
+    
+    werase(win);
+    box(win, 0, 0); // draw default borders
+
+    // Draw selections.
+    mvwprintw(win, 1, 4, "Play");
+    mvwprintw(win, 2, 4, "About");
+    mvwprintw(win, 3, 4, "Exit");
+
+    // Draw cursor.
+    switch (this->cursor_position)
+    {
+    case Full_Handler::MM_Play:
+        cursor.y = 1;
+        break;
+    
+    case Full_Handler::MM_About:
+        cursor.y = 2;
+        break;
+
+    case Full_Handler::MM_Exit:
+        cursor.y = 3;
+        break;
+    }
+
+    wattron(win, COLOR_PAIR(Full_Handler::color_menu_sel));
+    mvwprintw(win, cursor.y, cursor.x, "->");
+    wattroff(win, COLOR_PAIR(Full_Handler::color_menu_sel));
+
+    wrefresh(win);
+
+    return;
+}
+
+/* Full_Handler: main_menu
+ * Precondition: None.
+ * Postcondition: It initializes the main menu and returns the user selection (represented with Full_Handler::MM_ constants).
+ */
+int Full_Handler::main_menu() {
+    WINDOW* banner, * menu_selection;
+    int user_input;
+    bool done{ false };
+
+    curs_set(0); // invisible cursor
+
+    // position of the windows
+    menu_selection = newwin(5, 11, LINES / 2, (COLS - 11) / 2);
+    banner = newwin(5, 40, LINES / 2 - 6, (COLS - 36) / 2);
+
+    refresh();
+    this->mm_banner_draw(banner);
+
+    this->cursor_position = Full_Handler::MM_Play;
+    while (!done) {
+        this->mm_draw_selection(menu_selection);
+
+        user_input = getch();
+
+        switch (user_input)
+        {
+        case KEY_UP:
+            this->cursor_position -= (this->cursor_position == Full_Handler::MM_Play) ? 0 : 1;
+            break;
+        
+        case KEY_DOWN:
+            this->cursor_position += (this->cursor_position == Full_Handler::MM_Exit) ? 0 : 1;
+            break;
+        
+        case '\n':
+            done = true;
+            break;
+        }
+    }
+    
+    return this->cursor_position;
+}
