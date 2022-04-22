@@ -1,26 +1,28 @@
 #include "full_handler.h"
 
+#include <cctype>
+
 /* Full Run
  * Precondition: None.
  * Postcondition: This subroutine uses all the elements in the Full_Handler library to run an instance of the ToH_TUI game.
  */
 void run_full() {
     Full_Handler ha;
+    int controller;
 
-    ha.main_menu();
-
-    /* // TESTING.
-    initscr();
-
-    printw("Maximum amount of disks: %u", Round::get_maximum_disks());
-
-    getch();
-    clear();
-
-    Round game("Rodolfo", 16);
-    game.play();
-
-    endwin();*/
+    while ((controller = ha.main_menu()) != Full_Handler::MM_Exit) {
+        switch (controller)
+        {
+        case Full_Handler::MM_Play:
+            ha.setup();
+            ha.play();
+            break;
+        
+        case Full_Handler::MM_About:
+            // ha.about();
+            break;
+        }
+    }
 
     return;
 }
@@ -580,6 +582,119 @@ int Full_Handler::main_menu() {
             break;
         }
     }
+
+    delwin(menu_selection);
+    delwin(banner);
     
     return this->cursor_position;
+}
+
+/* Full_Handler: sm_draw
+ * Precondition: A pointer to a window with the dimensions (width = 60, height = 14).
+ * Postcondition: It draws the a window with the information in the class members.
+ */
+void Full_Handler::sm_draw(WINDOW* win) {
+    constexpr int padding_left{ 2 };
+    const std::string player_name_prompt{ "Player name: " };
+    const std::string disks_prompt{ "Your amount of disks: " };
+    const std::string go_prompt{ "Go!" };
+
+    werase(win);
+    box(win, 0, 0);
+    
+    mvwprintw(win, 1, padding_left, "SETUP");
+
+    // Player name.
+    mvwprintw(win, 3, padding_left, "%s%s", player_name_prompt.c_str(), this->player_name.c_str());
+
+    // Amount of disks.
+    mvwprintw(win, 5, padding_left, "Maximum amount of disks: %u", Round::get_maximum_disks());
+    mvwprintw(win, 6, padding_left, "%s%u", disks_prompt.c_str(), this->disks_amount);
+    
+    // Info.
+    mvwprintw(win, 8, padding_left, "Use arrows and enter to navigate this menu.");
+    mvwprintw(win, 9, padding_left, "Use left and right arrows to change the disks value.");
+
+    // Go.
+    mvwprintw(win, 11, padding_left, "%s", go_prompt.c_str());
+
+    // Position the cursor.
+    switch (this->cursor_position)
+    {
+    case Full_Handler::SM_Name:
+        wmove(win, 3, padding_left + player_name_prompt.size() + this->player_name.size());
+        break;
+    
+    case Full_Handler::SM_Disks:
+        wmove(win, 6, padding_left + disks_prompt.size() + std::to_string(this->disks_amount).size());
+        break;
+    
+    case Full_Handler::SM_Go:
+        wmove(win, 11, padding_left + go_prompt.size());
+        break;
+    }
+    
+    wrefresh(win);
+}
+
+/* Full_Handler: setup
+ * Precondition: None.
+ * Postcondition: It will draw a setup menu and ask the user for the name and the number of disks to use.
+ */
+void Full_Handler::setup() {
+    WINDOW* setup_win;
+    int user_input;
+
+    constexpr int sw_height{ 14 };
+    constexpr int sw_width{ 60 };
+    setup_win = newwin(sw_height, sw_width, (LINES - sw_height) / 2, (COLS - sw_width) / 2);
+    keypad(setup_win, true);
+
+    // Start values.
+    this->player_name.clear();
+    this->cursor_position = Full_Handler::SM_Name;
+    this->disks_amount = 1;
+
+    curs_set(1); // show the cursor as normal
+
+    // Draw setup menu.
+    this->sm_draw(setup_win);
+
+    while ((user_input = wgetch(setup_win)) != '\n' || this->cursor_position != Full_Handler::SM_Go) // de morgan's law
+    {
+        if (user_input == KEY_UP) this->cursor_position -= (this->cursor_position == Full_Handler::SM_Name) ? 0 : 1;
+        else if (user_input == KEY_DOWN || user_input == '\n' || user_input == '\t') this->cursor_position += (this->cursor_position == Full_Handler::SM_Go) ? 0 : 1;
+        else { // no arrow keys are being press; process...
+            switch (this->cursor_position) // where are we at?
+            {
+            case Full_Handler::SM_Name:
+                if ((user_input == KEY_BACKSPACE || user_input == '\b' || user_input == 127) && this->player_name.size() > 0) this->player_name.pop_back(); // delete last char
+                else if ((std::isprint(user_input) != 0) && this->player_name.size() < 43) this->player_name += static_cast<char>(user_input);
+                break;
+            
+            case Full_Handler::SM_Disks:
+                if (user_input == KEY_RIGHT) this->disks_amount += (this->disks_amount < Round::get_maximum_disks()) ? 1 : 0;
+                else if (user_input == KEY_LEFT) this->disks_amount -= (this->disks_amount > 1) ? 1 : 0;
+                break;
+
+            // case Full_Handler::SM_Go: // nothing to do here...
+            //    break;
+            }
+        }
+
+
+        // Draw after updating.
+        this->sm_draw(setup_win);
+    }
+
+    curs_set(0); // return the cursor to invisible
+}
+
+/* Full_Handler: play
+ * Precondition: Setup must have been called.
+ * Postcondition: Creates a Round instance and calls the play method (runs a game).
+ */
+void Full_Handler::play() {
+    Round round(this->player_name, this->disks_amount);
+    round.play();
 }

@@ -144,6 +144,8 @@ private:
     static constexpr short color_banner{ 1 };   // used to display the banner in the main menu
     static constexpr short color_menu_sel{ 2 }; // used to display the selector arrow in the main menu
 
+    // Draw the setup menu.
+    void sm_draw(WINDOW* setup_window);
 public:
     Full_Handler();
     ~Full_Handler();
@@ -158,10 +160,15 @@ public:
     static constexpr int MM_Setup{ 4 };
 
     // Diplay the setup screen. Updates the game data values.
-    // void setup();
+    void setup();
+
+    // Cursor position for the setup menu.
+    static constexpr int SM_Name{ 1 };
+    static constexpr int SM_Disks{ 2 };
+    static constexpr int SM_Go{ 3 };
 
     // Start a game. Uses the game data in the object to call the game.
-    // void play();
+    void play();
 
     // Display the "About" information.
     // void about();
