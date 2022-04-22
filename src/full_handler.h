@@ -3,106 +3,181 @@
 #define _FULL_HANDLER_H_
 
 #include "game_engine.h"
-#include <iostream>
-#include <string>
-#include <vector>
 #include <ncurses.h>
-#include <csignal>
+
+#include <chrono>
+#include <string>
 
 // Run game in "Full" mode.
 void run_full();
 
-// Used to keep all the dimensions of a window in a single structure.
-typedef struct {
-	size_t startx = 0,
-	       starty = 0,
-		   width  = 0,
-		   height = 0;
-} Window_Dimensions_Struct;
 
-// Used to share keep points in the screen. The FH prefix is to distinguish it from the game engine Point_Struct.
+/* Point Structure
+ * Used for different window calculations on the screen.
+ */
 typedef struct {
-	size_t x = 0,
-		   y = 0;
-} FH_Point_Struct;
+    int x = 0,
+        y = 0;
+} Point_Structure;
 
-// Game configuration to setup game.
+/* Dimensions Structure
+ * Used for keeping the values of the different windows handy.
+ */
 typedef struct {
-	size_t max_disk = 0,
-		   num_disk_selected = 0;
-	std::string player_name;
-} Game_Config_Struct;
+    int width = 0,
+        height = 0;
+} Dimensions_Struct;
 
-// Data structure used to draw the setup menu.
-typedef struct {
-	Game_Config_Struct* game_config;
-	int cursor_position;
-} Setup_Draw_Config;
 
+/* Game_Data
+ * Used to save a game instance for later. This mechanism is going to be implemented latter.
+ */
+/* typedef struct {
+
+} Game_Data; */
+
+/* Round Class
+ * It manages the actual gameplay, and interface of a game instance.
+ */
+class Round
+{
+private:
+    // Time members. These are set on the play call.
+    std::chrono::duration<std::chrono::system_clock::rep> saved_duration;   // saved for a paused game
+    std::chrono::time_point<std::chrono::system_clock> start_time;          // for duration calculations
+    int seconds; // total time: seconds (up to 60)
+    int minutes; // total time: minutes
+
+    // Game mechanics members.
+    ToH_Game game_engine;   // instance of the game mechanics
+    bool holding_disk;      // flag for displaying source as holded (for the tui)
+    int disk_pos;   // a ToH_Game::rod_ representing the position where the source disk is being holded
+    int src_rod;   // a ToH_Game::rod_ constant representing the source rod
+    int dst_rod;   // a ToH_Game::rod_ constant representing the destination rod
+    std::string player_name;
+    const int refresh_rate; // recommended 10 Hz
+    bool done;      // used for game loop 
+
+    // Windows for the different parts of the game.
+    WINDOW* disks_window;           // disks and rods window
+    WINDOW* controls_board_window;  // information below the disks window
+    WINDOW* info_window;            // top bar info
+
+    // Dimensions of the different windows (for graphics calculations on updating).
+    Dimensions_Struct dw_dimensions;    // disk_window dimensions
+    Dimensions_Struct cbw_dimensions;   // control_board_window dimensions
+    Dimensions_Struct iw_dimensions;    // info_window dimensions
+
+    // Calculate and save the time (minutes and seconds) based on the start_time + saved duration.
+    void update_time_elapsed();
+
+    // Initializes all the windows.
+    void init_scrns();
+
+    // Setup ncurses variables like colors. Call only once after ncurses initialization.
+    void ncurses_setup();
+
+    // Destroy all windows (layout).
+    void del_scrns();
+
+    // Draw the game in the screen based on member values. (Note: ncurses color pairs 10-11 are reserved for the draw functions.)
+    void draw();
+
+    // Draws info_bar window. 
+    void draw_info();
+
+    // Draw the rods and disks in the disks_window and refresh.
+    void draw_disks();
+
+    // Routine for drawing the disks in a rod.
+    void draw_rod_disks(const int& rod_pos, std::vector<unsigned>& disk_ids);
+
+    // Draw the information in the controls_board_window and refresh.
+    void draw_controls_board();
+
+    // Color constants. Used for styles.
+    static constexpr short color_board{ 10 };  // used for the board
+    static constexpr short color_disk{ 11 };   // used for the disks
+
+    // Process user input (update game values) or do nothing if NULL.
+    void process(int key_input);
+
+    // Setup source disk based on rod_position.
+    void set_src();
+
+    // Display final output.
+    void display_record();
+
+public:
+    // Round constructor.
+    Round(const std::string& player_name, const size_t& amount_of_disks = 3, int fps = 10);
+
+    // Play the round (from start to puzzle solved).
+    void play();
+
+    // Get the disk dimension. Used moslty for graphic calculations.
+    static int get_disk_dimension(int disk_num);
+
+    // Get maximum amount of disks possible for the current screen size.
+    static unsigned get_maximum_disks();
+
+    // Save the game state. (To implement later.)
+    // Game_Data save();
+};
+
+/* Full Handler
+ * Simple interface to initialize and manage the game (e.g. game main menu and setup).
+ */
 class Full_Handler
 {
+private:
+    // Game data.
+    std::string player_name;
+    unsigned disks_amount;
+    
+    // Windows handlers.
+    int cursor_position;
+
+    // Helper functions.
+
+    // Draw banne for the main menu.
+    void mm_banner_draw(WINDOW* banner_win);
+
+    // Draw menu based on the cursor position.
+    void mm_draw_selection(WINDOW* selection_win);
+
+    // Color pair used for ncurses drawings (Full_Handler reserves pairs 1 to 5);
+    static constexpr short color_banner{ 1 };   // used to display the banner in the main menu
+    static constexpr short color_menu_sel{ 2 }; // used to display the selector arrow in the main menu
+
+    // Draw the setup menu.
+    void sm_draw(WINDOW* setup_window);
 public:
-	// Setup the game.
-	Full_Handler();
+    Full_Handler();
+    ~Full_Handler();
 
-	// The three rule of three. Is it necessary?
-	~Full_Handler();
+    // Display the main menu. Returns a constant representing the current selection.
+    int main_menu();
 
-	// Manages a round.
-	// void run_round();
+    // Selection constants.
+    static constexpr int MM_Play{ 1 };
+    static constexpr int MM_About{ 2 };
+    static constexpr int MM_Exit{ 3 };
+    static constexpr int MM_Setup{ 4 };
 
-	// Game solved? Returns true if so.
-	bool solved() { return this->game->is_solved(); }
+    // Diplay the setup screen. Updates the game data values.
+    void setup();
 
-	// Main Menu options.
-	static constexpr int MM_Exit{ 0 };
-	static constexpr int MM_Play{ 1 };
-	static constexpr int MM_Licenses{ 2 };
-	// static constexpr int MM_About{ 3 }; // Maybe implement this later.
+    // Cursor position for the setup menu.
+    static constexpr int SM_Name{ 1 };
+    static constexpr int SM_Disks{ 2 };
+    static constexpr int SM_Go{ 3 };
 
-	// For screen dimensions calculation.
-	static constexpr size_t info_panel_height{ 3 };
+    // Start a game. Uses the game data in the object to call the game.
+    void play();
 
-	// Minimum values for screen size.
-	static constexpr size_t Screen_Min_Width{ 9 };
-	static constexpr size_t Screen_Min_Height{ 3 + Full_Handler::info_panel_height + 6 };
-
-private: 
-	char src_sel, dst_sel;
-	ToH_Game* game;
-	std::string player_name;
-	
-	int sel_input_state; // Represents the current input state.
-
-	// Selection inputs (for representing input states).
-	static constexpr int si_src{ 0 };
-	static constexpr int si_dst{ 1 };
-	static constexpr int si_go{ 2 };
-
-	// Helper functions.
-
-	// Display setup questions. How many disks would you like to play with?
-	Game_Config_Struct get_game_setup();
-
-	// Get the maximum number of disks that can be used based on the current window size.
-	size_t get_maximum_nums_of_disks();
-
-	// Selection constants.
-	static constexpr int SMS_Disk_Num{ 1 };		// Selecting the number of disks.
-	static constexpr int SMS_Player_Name{ 2 };	// Entering the player name.
-	static constexpr int SMS_Play{ 2 };			// Selection over the play button.
-
-	// Dispaly current state of the rods.
-	// void display_rods_state();
-
-	// Display help info.
-	// void display_help();
-
-	// Display current selection for the move.
-	// void display_selection();
-
-	// This will update selection characters and call display_selection.
-	// void get_move();
+    // Display the "About" information.
+    // void about();
 };
 
 #endif

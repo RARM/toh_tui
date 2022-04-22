@@ -93,6 +93,7 @@ public:
 
 	// Constants representing each rod.
 	
+	static constexpr int rod_NULL{ 3 };
 	static constexpr int rod_A{ 0 };
 	static constexpr int rod_B{ 1 };
 	static constexpr int rod_C{ 2 };
@@ -102,6 +103,9 @@ public:
 
 	// Return the amount of moves for the optimal solution for this game.
 	size_t opt_sol() { return static_cast<size_t>(std::pow(2, this->disks_amount)) - 1; }
+
+	// Get the number of disks set for this game.
+	size_t get_disk_num() { return this->disks_amount; }
 
 private:
 	const size_t disks_amount;
