@@ -20,6 +20,5 @@ Game tasks. Implement:
 - [ ] Scoring system.
 - [ ] Pause functionality (during solving puzzle).
 - [ ] Tutorial.
-- [ ] About page in the menu.
-
+- [ ] About page in the menu.<br /><br />
 - [ ] Finishe the journal after "Game tasks" get completed.
