@@ -75,6 +75,9 @@ void Round::play() {
 
     this->del_scrns();
 
+    // Show score.
+    this->display_record();
+
     return;
 }
 
@@ -451,7 +454,10 @@ void Round::process(int key_input) {
     }
 
     // Was the game solved?
-    if (this->game_engine.is_solved()) this->done = true;
+    if (this->game_engine.is_solved()) {
+        this->done = true;
+        this->update_time_elapsed(); // save time for score
+    }
 
     return;
 }
@@ -475,6 +481,47 @@ void Round::set_src() {
             this->src_rod = (game_state.C.size() > 0) ? ToH_Game::rod_C : ToH_Game::rod_NULL;
             break;
     }
+}
+
+/* Round: display_record
+ * Precondition: The time must have been updated. Game completed.
+ * Postcondition: Display a message showing the score.
+ */
+void Round::display_record() {
+    WINDOW* record_window;
+    constexpr int left_padding{ 2 };
+    int user_input;
+
+    std::string mins, secs;
+
+    clear();
+
+    constexpr int rw_height{ 9 };
+    constexpr int rw_width{ 60 };
+    record_window = newwin(rw_height, rw_width, (LINES - rw_height) / 2, (COLS - rw_width) / 2);
+    box(record_window, 0, 0);
+
+    // Total time.
+    mins = std::to_string(this->minutes);
+    if (mins.size() < 2) mins.insert(0, "0");
+
+    secs = std::to_string(this->seconds);
+    if (secs.size() < 2) secs.insert(0, "0");
+
+    // Display player name.
+    mvwprintw(record_window, 1, left_padding, "SCORE");
+    mvwprintw(record_window, 2, left_padding, "Player: %s", this->player_name.c_str());
+    mvwprintw(record_window, 3, left_padding, "Time: %s:%s", mins.c_str(), secs.c_str());
+    mvwprintw(record_window, 4, left_padding, "Total moves: %zu", this->game_engine.get_moves());
+    mvwprintw(record_window, 5, left_padding, "Optimal moves: %zu", this->game_engine.opt_sol());
+    mvwprintw(record_window, 7, left_padding, "Press <enter> to exit.");
+
+    wrefresh(record_window);
+
+    while ((user_input = wgetch(record_window)) != '\n');
+    
+    delwin(record_window);
+    refresh();
 }
 
 /* Round: get_maximum_disks
@@ -733,7 +780,6 @@ void Full_Handler::setup() {
             //    break;
             }
         }
-
 
         // Draw after updating.
         this->sm_draw(setup_win);

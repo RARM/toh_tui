@@ -105,6 +105,9 @@ private:
     // Setup source disk based on rod_position.
     void set_src();
 
+    // Display final output.
+    void display_record();
+
 public:
     // Round constructor.
     Round(const std::string& player_name, const size_t& amount_of_disks = 3, int fps = 10);
