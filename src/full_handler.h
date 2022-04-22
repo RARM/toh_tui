@@ -102,6 +102,9 @@ private:
     // Process user input (update game values) or do nothing if NULL.
     void process(int key_input);
 
+    // Setup source disk based on rod_position.
+    void set_src();
+
 public:
     // Round constructor.
     Round(const std::string& player_name, const size_t& amount_of_disks = 3, int fps = 10);

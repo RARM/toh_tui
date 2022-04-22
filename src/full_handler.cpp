@@ -134,6 +134,7 @@ void Round::del_scrns() {
     delwin(this->disks_window);
     delwin(this->controls_board_window);
 
+    clear();
     refresh();
 }
 
@@ -397,32 +398,83 @@ void Round::process(int key_input) {
             this->game_engine.move(this->src_rod, this->disk_pos);
             this->holding_disk = false;
         } else {
-            switch (this->disk_pos) { // save the id of the src rod
-            case ToH_Game::rod_A:
-                this->src_rod = (game_state.A.size() > 0) ? ToH_Game::rod_A : ToH_Game::rod_NULL;
-                break;
-            case ToH_Game::rod_B:
-                this->src_rod = (game_state.B.size() > 0) ? ToH_Game::rod_B : ToH_Game::rod_NULL;
-                break;
-            case ToH_Game::rod_C:
-                this->src_rod = (game_state.C.size() > 0) ? ToH_Game::rod_C : ToH_Game::rod_NULL;
-                break;
-            }
-
+            this->set_src();
             this->holding_disk = (this->src_rod != ToH_Game::rod_NULL) ? true : false;
         }
         break;
 
-    case 'a':
+    case 'a': // grab or place disk in rod a
     case 'A':
+    case 'j':
+    case 'J':
+        if (this->holding_disk) {
+            this->game_engine.move(this->src_rod, ToH_Game::rod_A);
+            this->holding_disk = false;
+        } else {
+            this->src_rod = (game_state.A.size() > 0) ? ToH_Game::rod_A : ToH_Game::rod_NULL;
+            this->holding_disk = (this->src_rod != ToH_Game::rod_NULL) ? true : false;
+        }
+        this->disk_pos = ToH_Game::rod_A;
+        break;
+
+    case 's': // grab or place disk in rod b
+    case 'S':
+    case 'k':
+    case 'K':
+    case 'b':
+    case 'B':
+        if (this->holding_disk) {
+            this->game_engine.move(this->src_rod, ToH_Game::rod_B);
+            this->holding_disk = false;
+        } else {
+            this->src_rod = (game_state.B.size() > 0) ? ToH_Game::rod_B : ToH_Game::rod_NULL;
+            this->holding_disk = (this->src_rod != ToH_Game::rod_NULL) ? true : false;
+        }
+        this->disk_pos = ToH_Game::rod_B;
         break;
     
-    case 'q':
-    case 'Q':
-        this->done = true;
+    case 'd': // grab or place disk in rod c
+    case 'D':
+    case 'l':
+    case 'L':
+    case 'c':
+    case 'C':
+        if (this->holding_disk) {
+            this->game_engine.move(this->src_rod, ToH_Game::rod_C);
+            this->holding_disk = false;
+        } else {
+            this->src_rod = (game_state.C.size() > 0) ? ToH_Game::rod_C : ToH_Game::rod_NULL;
+            this->holding_disk = (this->src_rod != ToH_Game::rod_NULL) ? true : false;
+        }
+        this->disk_pos = ToH_Game::rod_C;
         break;
     }
+
+    // Was the game solved?
+    if (this->game_engine.is_solved()) this->done = true;
+
     return;
+}
+
+/* Round: set_src
+ * Precondition: disk_pos must be positioned in a rod, and holding_disk must be false.
+ * Postcondition: It processes the disk_pos to set the current src.
+ */
+void Round::set_src() {
+    Rods game_state{ this->game_engine.get_state() };
+
+    switch (this->disk_pos) // save the id of the src rod
+    {
+        case ToH_Game::rod_A:
+            this->src_rod = (game_state.A.size() > 0) ? ToH_Game::rod_A : ToH_Game::rod_NULL;
+            break;
+        case ToH_Game::rod_B:
+            this->src_rod = (game_state.B.size() > 0) ? ToH_Game::rod_B : ToH_Game::rod_NULL;
+            break;
+        case ToH_Game::rod_C:
+            this->src_rod = (game_state.C.size() > 0) ? ToH_Game::rod_C : ToH_Game::rod_NULL;
+            break;
+    }
 }
 
 /* Round: get_maximum_disks
